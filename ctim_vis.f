@@ -156,13 +156,17 @@ c     satellites position and outputs the data in a form for gnuplot to plot the
 c     Joseph B Jensen july 2014
 c
       real den(15,91,20),ht(15,91,20),denb(15,91,20)
+      real zkmheight(90,90,20),oprod_rate_nprec(90,90,20)
+      real o2prod_rate_nprec(90,90,20),n2prod_rate_nprec(90,90,20)
+      real oprod_rate_yprec(90,90,20),o2prod_rate_yprec(90,90,20)
+      real n2prod_rate_yprec(90,90,20)
       real*8 ssecond,seconds,xgeo,ygeo,zgeo,xgse,ygse,zgse,lat,long
       real satx(10),saty(10),satz(10),satxgeo(10),satygeo(10)
       real satzgeo(10),interheight,mindis,val1,val2,avl3,val4
       integer altnum,syear,smonth,sday,shour,sminute,sattime(10)
       integer timenum,timenuminit,nyear,nmonth,nday,nhour,nminute,nsat
       integer pos1,pos2,pos3,pos4,pos5
-      character*80 l1,l2,l3,l4,fgrid
+      character*80 l1(10),fgrid,l2
       character*100 dummy1,dummy2,dummy3,dummy4,dummy5,dummy6
       character*20 dummy,satname(10)
       character*200 f3d,backgroundfile
@@ -172,30 +176,26 @@ c
 c     get the file name of the ioc file to read in the data
       call getarg(1,f3d)
       open(10,file=f3d,status='old')
-c     get the background file to subtract off if needed
-      call getarg(2,backgroundfile)
-c      open(11,file=backgroundfile,status='old')
-c     get the variable to look at (e.g. density or electron energy)
-      call getarg(3,l1)
+c     get the variables to look at (e.g. density or electron energy)
+      do I=1,7
+      call getarg(I+1,l1(I))
+      enddo
 c     get the altitude/pressure height layer (1-15)
-      call getarg(4,altnumc)
-c     convert to an integer
-c      read (altnumc,'(I10)') altnum
-c     contains the time in seconds from start of the run (needed to transform coordinates)
-      call getarg(5,chtimenum) 
+      call getarg(9,chtimenum) 
 c     convert to an integer
       read (chtimenum,'(I10)') timenum
       timenuminit=timenum
       print*,"timemun= ",timenum
 c     read the l1 from the ioc file
-      call getf31(10,den,nnx,nny,nnz,l1,l2,it)
-      close(unit=10)
-      call getf31(11,denb,nnx,nny,nnz,l1,l2,it)
-c     read the altitude fields in the ioc file
-      l3='CTIM_zkmheight_3D_GEO'
-      open(10,file=f3d,status='old')
-      call getf31(10,ht,nnx,nny,nnz,l3,l4,it)
-      close(unit=10)
+
+      call getf31(10,zkmheight,nnx,nny,nnz,l1(1),l2,it)
+      call getf31(10,oprod_rate_nprec,nnx,nny,nnz,l1(2),l2,it)
+      call getf31(10,o2prod_rate_nprec,nnx,nny,nnz,l1(3),l2,it)
+      call getf31(10,n2prod_rate_nprec,nnx,nny,nnz,l1(4),l2,it)
+      call getf31(10,oprod_rate_yprec,nnx,nny,nnz,l1(5),l2,it)
+      call getf31(10,o2prod_rate_yprec,nnx,nny,nnz,l1(6),l2,it)
+      call getf31(10,n2prod_rate_yprec,nnx,nny,nnz,l1(7),l2,it)
+
 
 !!!! get the imte right to make transformations
 c     we need to initialize the coordinate transformation program by calling ctim_cotr_set
@@ -235,279 +235,286 @@ c     check the output and make sure it makes sense
       print*,"second= ",seconds
       call ctim_cotr_set(nyear,nmonth,nday,nhour,nminute,seconds)
 
+!!!!  output the data to plot
+c     longitude slice of the ionization rates
+      lslice=5
+      open(unit=101, file="long_slice_000.txt")
+      open(unit=106, file="long_slice_090.txt")
+      open(unit=111, file="long_slice_180.txt")
+      open(unit=116, file="long_slice_270.txt")
+      open(unit=117, file="alt_slice_k-10.txt")
+      do I=1,90           !long
+         do J=1,20        !lat
+            do k=1,90     !height
+
+       if (K .eq. 15)then
+c     create xyz geo coordinates
+               the=(I-1)*2.*(3.14159/180)
+               phi=(mod((((j-1)*18.)+180.0),360.0)-180)*(3.14159/180)
+               R=6731+(zkmheight(K,I,J)/1000)
+       xgeo=(6731+(zkmheight(K,I,J)/1000))*sin(the)*cos(phi)
+       ygeo=(6731+(zkmheight(K,I,J)/1000))*sin(the)*sin(phi)
+       zgeo=(6731+(zkmheight(K,I,J)/1000))*cos(the)
+c     print out a polar profile
+
+          call ctim_cotr('geo','gse',xgeo,ygeo,zgeo,xgse,ygse,zgse)
+          write(117,*)xgeo,ygeo,zgeo,xgse,ygse,zgse,zkmheight(k,I,J),
+     1oprod_rate_nprec(k,I,J),o2prod_rate_nprec(k,I,J),
+     2n2prod_rate_nprec(k,I,J),oprod_rate_yprec(k,I,J),
+     3o2prod_rate_yprec(k,I,J),n2prod_rate_yprec(k,I,J),I,J,K
+          if (J .eq. 20) then 
+               the=(I-1)*2.*(3.14159/180)
+               phi=(mod((((1-1)*18.)+180.0),360.0)-180)*(3.14159/180)
+               R=6731+(zkmheight(K,I,1)/1000)
+       xgeo=(6731+(zkmheight(K,I,1)/1000))*sin(the)*cos(phi)
+       ygeo=(6731+(zkmheight(K,I,1)/1000))*sin(the)*sin(phi)
+       zgeo=(6731+(zkmheight(K,I,1)/1000))*cos(the)
+             write(117,*)xgeo,ygeo,zgeo,xgse,ygse,zgse,zkmheight(k,I,1),
+     1oprod_rate_nprec(k,I,1),o2prod_rate_nprec(k,I,1),
+     2n2prod_rate_nprec(k,I,1),oprod_rate_yprec(k,I,1),
+     3o2prod_rate_yprec(k,I,1),n2prod_rate_yprec(k,I,1),I,J,K
+          endif
+       endif
+c     now print out lat slices
+               if (j .eq. 1) then
+      write(101,*)I,J,K,zkmheight(k,I,J),oprod_rate_nprec(k,I,J),
+     1o2prod_rate_nprec(k,I,J),n2prod_rate_nprec(k,I,J),
+     2oprod_rate_yprec(k,I,J),o2prod_rate_yprec(k,I,J),
+     3n2prod_rate_yprec(k,I,J)
+              endif
+               if (j .eq. 6) then
+      write(106,*)I,J,K,zkmheight(k,I,J),oprod_rate_nprec(k,I,J),
+     1o2prod_rate_nprec(k,I,J),n2prod_rate_nprec(k,I,J),
+     2oprod_rate_yprec(k,I,J),o2prod_rate_yprec(k,I,J),
+     3n2prod_rate_yprec(k,I,J)
+               endif
+               if (j .eq. 11) then
+      write(111,*)I,J,K,zkmheight(k,I,J),oprod_rate_nprec(k,I,J),
+     1o2prod_rate_nprec(k,I,J),n2prod_rate_nprec(k,I,J),
+     2oprod_rate_yprec(k,I,J),o2prod_rate_yprec(k,I,J),
+     3n2prod_rate_yprec(k,I,J)
+               endif
+               if (j .eq. 16) then
+      write(116,*)I,J,K,zkmheight(k,I,J),oprod_rate_nprec(k,I,J),
+     1o2prod_rate_nprec(k,I,J),n2prod_rate_nprec(k,I,J),
+     2oprod_rate_yprec(k,I,J),o2prod_rate_yprec(k,I,J),
+     3n2prod_rate_yprec(k,I,J)
+               endif
+            enddo
+            if (j .eq. 1) then
+               write(101,*)" "
+            endif
+            if (j .eq. 6) then
+               write(106,*)" "
+            endif
+            if (j .eq. 11) then
+               write(111,*)" "
+            endif
+            if (j .eq. 16) then
+               write(116,*)" "
+            endif
+         enddo
+         write(117,*)" "
+      enddo
+      j=1
+      do I=1,90                 !long                                                           
+         do k=1,90              !height                                                          
+            if (K .eq. 15)then
+c     create xyz geo coordinates                                                                  
+            the=(I-1)*2.*(3.14159/180)
+            phi=(mod((((j-1)*18.)+180.0),360.0)-180)*(3.14159/180)
+            R=6731+(zkmheight(K,I,J)/1000)
+            xgeo=(6731+(zkmheight(K,I,J)/1000))*sin(the)*cos(phi)
+            ygeo=(6731+(zkmheight(K,I,J)/1000))*sin(the)*sin(phi)
+            zgeo=(6731+(zkmheight(K,I,J)/1000))*cos(the)
+c     print out a polar profile                                                                     
+            
+            call ctim_cotr('geo','gse',xgeo,ygeo,zgeo,xgse,ygse,zgse)
+c          write(117,*)xgeo,ygeo,zgeo,xgse,ygse,zgse,zkmheight(k,I,J),
+c     1oprod_rate_nprec(k,I,J),o2prod_rate_nprec(k,I,J),
+c     2n2prod_rate_nprec(k,I,J),oprod_rate_yprec(k,I,J),
+c     3o2prod_rate_yprec(k,I,J),n2prod_rate_yprec(k,I,J),I,J,K
+            endif
+      enddo
+      enddo
+      
+
+
+
+      close(unit=101)
+      close(unit=106)
+      close(unit=111)
+      close(unit=116)
+
 !!!!  now we need to read in the satellite files and get the orbit information !!!!
-      nsat=6   !!! number of satellites in the orbits.txt
-      open(unit=27,file="/home/joe/trillian/storm_2011_08_04_v4/storm-20
-     +14-AUG-05-jr12/orbits.txt", status="old") !input
-      open(unit=28, file="orbits_sattraj_gse.txt")  !output
-      open(unit=29, file="orbits_sattraj_geo.txt")  !output
-      do i=1,nsat
-c     really funny way to read in the orbits.txt file to deal with : seperation
-      do while (sattime(i) .ne. timenuminit)
-         read(27,*) dummy1
-         pos1 = index(dummy1, ":")
-         read(dummy1(pos1+1:), *) dummy2
-         pos2 = index(dummy2, ":")
-         satname(I) = dummy2(1:pos2-1)
-         read(dummy2(pos2+1:), *) dummy3
-         pos3 = index(dummy3, ":")
-         read (dummy3(1:pos3-1),'(I10)') sattime(I)
-         read(dummy3(pos3+1:), *) dummy4
-         pos4 = index(dummy4, ":")
-         read (dummy4(1:pos4-1),'(E16.7)') satx(I)
-         read(dummy4(pos4+1:), *) dummy5
-         pos5 = index(dummy5, ":")
-         read (dummy5(1:pos5-1),'(E16.7)') saty(I)
-         read(dummy5(pos5+1:), *) dummy6
-         read (dummy6,'(E16.7)') satz(I)
-      enddo
-      enddo
-c     convert to from gse to geo to make the interpolation calculations, but keep
-c     the gse info becuase it is easier to graph
-      do i=1,nsat
-         xgse=satx(I)
-         ygse=saty(I)
-         zgse=satz(I)
-         call ctim_cotr('gse','geo',xgse,ygse,zgse,xgeo,ygeo,zgeo) 
-         satxgeo(I)=xgeo
-         satygeo(I)=ygeo
-         satzgeo(I)=zgeo
-         write(29,*)satname(i),xgeo*6731,ygeo*6731,zgeo*6731,-0.0  !write sats position geo
-       write(28,*)satname(i),satx(i)*6731,saty(i)*6731,satz(i)*6731,-0.0 !write sats position gse
-      enddo
-      goto 104
- 103  print*,"end of sat file reading, continuing" !!! the end statement is needed if the sat dat isn't long enough
-      write(29,*)-9999,0.0,0.0,0.0  !!write dummy files for the satellites to remove from graph
-      write(28,*)-9999,0.0,0.0,0.0 
- 104  continue
+c      nsat=6   !!! number of satellites in the orbits.txt
+c      open(unit=27,file="/home/joe/trillian/storm_2011_08_04_v4/storm-20
+c     +14-AUG-05-jr12/orbits.txt", status="old") !input
+c      open(unit=28, file="orbits_sattraj_gse.txt")  !output
+c      open(unit=29, file="orbits_sattraj_geo.txt")  !output
+c      do i=1,nsat
+cc     really funny way to read in the orbits.txt file to deal with : seperation
+c      do while (sattime(i) .ne. timenuminit)
+c         read(27,*) dummy1
+c         pos1 = index(dummy1, ":")
+c         read(dummy1(pos1+1:), *) dummy2
+c         pos2 = index(dummy2, ":")
+c         satname(I) = dummy2(1:pos2-1)
+c         read(dummy2(pos2+1:), *) dummy3
+c         pos3 = index(dummy3, ":")
+c         read (dummy3(1:pos3-1),'(I10)') sattime(I)
+c         read(dummy3(pos3+1:), *) dummy4
+c         pos4 = index(dummy4, ":")
+c         read (dummy4(1:pos4-1),'(E16.7)') satx(I)
+c         read(dummy4(pos4+1:), *) dummy5
+c         pos5 = index(dummy5, ":")
+c         read (dummy5(1:pos5-1),'(E16.7)') saty(I)
+c         read(dummy5(pos5+1:), *) dummy6
+c         read (dummy6,'(E16.7)') satz(I)
+c      enddo
+c      enddo
+cc     convert to from gse to geo to make the interpolation calculations, but keep
+cc     the gse info becuase it is easier to graph
+c      do i=1,nsat
+c         xgse=satx(I)
+c         ygse=saty(I)
+c         zgse=satz(I)
+c         call ctim_cotr('gse','geo',xgse,ygse,zgse,xgeo,ygeo,zgeo) 
+c         satxgeo(I)=xgeo
+c         satygeo(I)=ygeo
+c         satzgeo(I)=zgeo
+c         write(29,*)satname(i),xgeo*6731,ygeo*6731,zgeo*6731,-0.0  !write sats position geo
+c       write(28,*)satname(i),satx(i)*6731,saty(i)*6731,satz(i)*6731,-0.0 !write sats position gse
+c      enddo
+c      goto 104
+c 103  print*,"end of sat file reading, continuing" !!! the end statement is needed if the sat dat isn't long enough
+c      write(29,*)-9999,0.0,0.0,0.0  !!write dummy files for the satellites to remove from graph
+c      write(28,*)-9999,0.0,0.0,0.0 
+c 104  continue
 
 !!!!  interpolating to a satellites coordinates !!!!
 c     satellites position satname(i),satx(i)*6731,saty(i)*6731,satz(i)*6731
 c     do the interpolation in GEO coordinates because it is easier (convert from gse to geoxyz)
 c     !!!!WILL PROBABLY BREAK IF SATELLITE IS ABOVE ~500km!!!!
-      do I=1,nsat   
-      if (I .eq. 5 .or. I .eq. 6) then ! this is to look only at grace1 and 2 satellites, dmsp are too high
-      alt=sqrt(satxgeo(i)*satxgeo(i)+satygeo(i)*satygeo(i)+satzgeo(i)
-     1*satzgeo(i))
-      interheight=(alt-1.0)*6371000.0  !set interpolate height as altitude of sat
-c      interheight=410*1000.  !interpolate heigth as fixed value
-      print*,"alt of the sat: ",interheight
-      lat=acos(satzgeo(i)/alt)        !!theta in radians
-      long=acos(satxgeo(i)/(alt*sin(lat)))       !!phi in radians
-      lat=lat*(180/3.14159)
-      long=long*(180/3.14159)
-         j = (INT(lat) + 90)/2 + 1
-         k = INT(long)/18 + 1
-         print*,"j= ",j
-         print*,"k= ",k
-         print*,"lat= ",lat
-         print*,"long= ",long
-         iL=-10
-         mindis = 1000000.0
-         do iL1=1,15
-            if (mindis .gt. ABS(interheight-(ht(iL1,j,k)))) then
-               iL = iL1
-               mindis = ABS(interheight-(ht(iL1,j,k)))
-               if (mindis .lt. 5000.) then
-                  print*,"low mindis!!!"
-               endif
-            endif
-         enddo
-         print*,"here is the interheight ",interheight
-         print*,"here is the altitude slab ",iL
-         print*,"here is mindis ",mindis         
-c     now do the interpolation, a cubic spline I think is what the method is called
-          if (ht(iL,j,k) .lt. interheight) then
-            val1 = den(iL,j,k) +
-     *           ((interheight-ht(iL,j,k))/(ht(iL+1,j,k)-ht(iL,j,k)))*
-     *           (den(iL+1,j,k)-den(iL,j,k))
-          else
-            val1 = den(iL,j,k) +
-     *           ((interheight-ht(iL,j,k))/(ht(iL-1,j,k)-ht(iL,j,k)))*
-     *           (den(iL-1,j,k)-den(iL,j,k))
-          endif
-          val1 = val1*1.0E11
-          if (ht(iL,j,k+1) .lt. interheight) then
-            val2 = den(iL,j,k+1) +
-     *     ((interheight-ht(iL,j,k+1))/(ht(iL+1,j,k+1)-ht(iL,j,k+1)))*
-     *           (den(iL+1,j,k+1)-den(iL,j,k+1))
-          else
-            val2 = den(iL,j,k+1) +
-     *     ((interheight-ht(iL,j,k+1))/(ht(iL-1,j,k+1)-ht(iL,j,k+1)))*
-     *           (den(iL-1,j,k+1)-den(iL,j,k+1))
-          endif
-          val2 = val2*1.0E11
-          if (ht(iL,j+1,k) .lt. interheight) then
-            val3 = den(iL,j+1,k) +
-     *      ((interheight-ht(iL,j+1,k))/(ht(iL+1,j+1,k)-ht(iL,j+1,k)))*
-     *           (den(iL+1,j+1,k)-den(iL,j+1,k))
-          else
-            val3 = den(iL,j+1,k) +
-     *     ((interheight-ht(iL,j+1,k))/(ht(iL-1,j+1,k)-ht(iL,j+1,k)))*
-     *           (den(iL-1,j+1,k)-den(iL,j+1,k))
-          endif
-          val3 = val3*1.0E11
-          if (ht(iL,j+1,k+1) .lt. interheight) then
-            val4 = den(iL,j+1,k+1) +
-     * ((interheight-ht(iL,j+1,k+1))/(ht(iL+1,j+1,k+1)-ht(iL,j+1,k+1)))*
-     *           (den(iL+1,j+1,k+1)-den(iL,j+1,k+1))
-          else
-            val4 = den(iL,j+1,k+1) +
-     * ((interheight-ht(iL,j+1,k+1))/(ht(iL-1,j+1,k+1)-ht(iL,j+1,k+1)))*
-     *           (den(iL-1,j+1,k+1)-den(iL,j+1,k+1))
-          endif
-          val4 = val4*1.0E11
-          rate1=(long-18*int(long/18))/18.0
-          val12=val1+(val2-val1)*rate1
-          val34=val3+(val4-val3)*rate1
-          rate2=(lat-2*int(lat/2))/2.0
-          znden1 = val12+(val34-val12)*rate2
-c     error handeling for times it passes over the cap which ins't calculated
-c     or for times the satellite is at the edge of the grid and we can't interpolate
-c     these aren't very pretty and I hope that they are accurate
-      if (znden1 .lt. 0) then
-      print*,"density is negative interpolation error -999.999999"
-      znden1 = -999.999
-      goto 189
-      endif
-      if (znden1 .lt. 0.09) then
-      print*,"on edge of boundary at 89 deg so -999.999999"
-      znden1 = -999.999
-      goto 189
-      endif
-      if (den(il,J,K) .lt. 1E-20) then
-      print*,"Density is too small, probably at boundary -999.999999"
-      znden1 = -999.999
-      goto 189
-      endif
-      if(ht(iL,j,k) .lt. interheight .and. iL .eq.15)then
-      print*,"sat is outside of interpolatable grid, -999.999999"
-      znden1 = -999.999
-      endif
- 189  continue
-      print*,"here is the density ", den(iL,J,K)*1.0E11
-     1," at ",ht(iL,j,k)
-          print*,"here is the interpolated density ", znden1
-      print*,"here is the density ", den(iL+1,J,K)*1.0E11,
-     1" at  ", ht(iL+1,j,k)
-          if (I .eq. 5) then          
-          open(unit=30, file="Grace1_interpolated.txt",access="append")
-          write(30,*)timenuminit,lat,long,interheight/1000.0,znden1
-          close(unit=30)
-          endif
-          if (I .eq. 6) then          
-          open(unit=30, file="Grace2_interpolated.txt",access="append")
-          write(30,*)timenuminit,lat,long,interheight/1000.0,znden1
-          close(unit=30)
-          endif
-      write(29,*)satname(i),xgeo*6731,ygeo*6731,zgeo*6731,znden1 !write sats position geo
-      write(28,*)satname(i),satx(i)*6731,saty(i)*6731,satz(i)*6731,
-     1znden1 !write sats position gse
-      endif
-      enddo
-      close(unit=28)
-      close(unit=28)
-
-!!!!  writing files for gnuplot to graph !!!!!
-c     okay now we have our inputs now it is time to start writing to files
-      if (f3d .eq. backgroundfile) then
-         open(22,file="data_altslice_min2_background.txt")
-         open(23,file="data_altslice_min1_background.txt")
-         open(24,file="data_altslice_background.txt")
-         open(25,file="data_longslice_background.txt")
-         open(26,file="data_latslice_background.txt")
-      else
-         open(22,file="data_altslice_min2.txt")
-         open(23,file="data_altslice_min1.txt")
-         open(24,file="data_altslice.txt")
-         open(25,file="data_longslice.txt")
-         open(26,file="data_latslice.txt")
-      endif
-c     loop through and output the information that we need to plot
-c     note the ctim is in geographic coordinate and we need to change it to
-c     GSE cooridinate so that it can map to the satellites position better and 
-c     also that the daily variation in ctim is gone ctim(height,lat,long) to gse(x,y,z)
-      do k = 1, nnz        ! this is the longitude (phi)
-         do j = 1, nny     ! this is the latitude (theta)
-            do i = 1, nnx  ! this is the height
-               the=(j-1)*2.*(3.14159/180)
-               phi=(mod((((k-1)*18.)+180.0),360.0)-180)*(3.14159/180)
-               R=6731+(ht(I,J,K)/1000)
-       xgeo=(6731+(ht(I,J,K)/1000))*sin(the)*cos(phi)
-       ygeo=(6731+(ht(I,J,K)/1000))*sin(the)*sin(phi)
-       zgeo=(6731+(ht(I,J,K)/1000))*cos(the)
-c     this output numbers for the pressure/altitdue slice (x,y,var)
-               if (i .eq. altnum )then !.and. (j-1)*2 .le. 90) then
-      call ctim_cotr('geo','gse',xgeo,ygeo,zgeo,xgse,ygse,zgse)
-      write(24,*)xgeo,ygeo,zgeo,xgse,ygse,zgse,den(I,J,K)!-denb(I,J,K)
-               endif
-cccc  this snippet of code was use to do difference plots, could be revitalized
-c               if (i .eq. altnum-1 )then!.and. (j-1)*2 .le. 90) then
-c      write (23,*)(6731+(ht(I,J,K)/1000))*sin(the)*cos(phi),
-c     1(6731+(ht(I,J,K)/1000))*sin(the)*sin(phi),den(I,J,K)-denb(I,J,K),
-c     2(6731+(ht(I,J,K)/1000))*cos(the)
+c      do I=1,nsat   
+c      if (I .eq. 5 .or. I .eq. 6) then ! this is to look only at grace1 and 2 satellites, dmsp are too high
+c      alt=sqrt(satxgeo(i)*satxgeo(i)+satygeo(i)*satygeo(i)+satzgeo(i)
+c     1*satzgeo(i))
+c      interheight=(alt-1.0)*6371000.0  !set interpolate height as altitude of sat
+cc      interheight=410*1000.  !interpolate heigth as fixed value
+c      print*,"alt of the sat: ",interheight
+c      lat=acos(satzgeo(i)/alt)        !!theta in radians
+c      long=acos(satxgeo(i)/(alt*sin(lat)))       !!phi in radians
+c      lat=lat*(180/3.14159)
+c      long=long*(180/3.14159)
+c         j = (INT(lat) + 90)/2 + 1
+c         k = INT(long)/18 + 1
+c         print*,"j= ",j
+c         print*,"k= ",k
+c         print*,"lat= ",lat
+c         print*,"long= ",long
+c         iL=-10
+c         mindis = 1000000.0
+c         do iL1=1,15
+c            if (mindis .gt. ABS(interheight-(ht(iL1,j,k)))) then
+c               iL = iL1
+c               mindis = ABS(interheight-(ht(iL1,j,k)))
+c               if (mindis .lt. 5000.) then
+c                  print*,"low mindis!!!"
 c               endif
-c               if (i .eq. altnum-2 )then! .and. (j-1)*2 .le. 90) then
-c      write (22,*)(6731+(ht(I,J,K)/1000))*sin(the)*cos(phi),
-c     1(6731+(ht(I,J,K)/1000))*sin(the)*sin(phi),den(I,J,K)-denb(I,J,K),
-c     2(6731+(ht(I,J,K)/1000))*cos(the)
-c               endif
-cccc  end of difference plots
-c    this outputs a longitude slice (long,alt,var)
-               if (k .eq. 5) then
-      write(25,*) (j-1)*2, ht(I,J,K)/1000, den(I,J,K)-denb(I,J,K)
-               endif
-c    this section outputs the latitude slice (lat,ht,var)
-               if (j .eq. 16) then
-      write(26,*) (k-1)*18, ht(I,J,K)/1000, den(I,J,K)-denb(I,J,K)
-               endif
-            enddo
-c     need to have blank lines between for gnuplot to plot things right
-            if (k .eq. 5) then
-               write(25,*)
-            endif
-            if (j .eq. 16) then
-               write(26,*)
-            endif
-         enddo
-         write(24,*)
-         write(23,*)
-         write(22,*)
-      enddo
-c     this is to put in the first value again so the polar graph closes
-      k=1
-      do j = 1, nny
-         do i = 1, nnx
-           if (i .eq. altnum)then! .and. (j-1)*2 .le. 90) then
-               the=(j-1)*2.*(3.14159/180)
-               phi=(mod((((k-1)*18.)+180.0),360.0)-180)*(3.14159/180)
-               R=6371+(ht(I,J,K)/1000)
-       xgeo=(6731+(ht(I,J,K)/1000))*sin(the)*cos(phi)
-       ygeo=(6731+(ht(I,J,K)/1000))*sin(the)*sin(phi)
-       zgeo=(6731+(ht(I,J,K)/1000))*cos(the)
-c     this output numbers for the pressure/altitdue slice (x,y,var)
-       if (i .eq. altnum )then  !.and. (j-1)*2 .le. 90) then
-          call ctim_cotr('geo','gse',xgeo,ygeo,zgeo,xgse,ygse,zgse)
-          write(24,*)xgeo,ygeo,zgeo,xgse,ygse,zgse,den(I,J,K)
-       endif
-      endif
-cccc old difference plot stuff
-c      if (i .eq. altnum-1 )then !.and. (j-1)*2 .le. 90) then
-c         write (23,*)(6731+(ht(I,J,K)/1000))*sin(the)*cos(phi),
-c     1(6731+(ht(I,J,K)/1000))*sin(the)*sin(phi),den(I,J,K)-denb(I,J,K),
-c     2(6731+(ht(I,J,K)/1000))*cos(the)
+c            endif
+c         enddo
+c         print*,"here is the interheight ",interheight
+c         print*,"here is the altitude slab ",iL
+c         print*,"here is mindis ",mindis         
+cc     now do the interpolation, a cubic spline I think is what the method is called
+c          if (ht(iL,j,k) .lt. interheight) then
+c            val1 = den(iL,j,k) +
+c     *           ((interheight-ht(iL,j,k))/(ht(iL+1,j,k)-ht(iL,j,k)))*
+c     *           (den(iL+1,j,k)-den(iL,j,k))
+c          else
+c            val1 = den(iL,j,k) +
+c     *           ((interheight-ht(iL,j,k))/(ht(iL-1,j,k)-ht(iL,j,k)))*
+c     *           (den(iL-1,j,k)-den(iL,j,k))
+c          endif
+c          val1 = val1*1.0E11
+c          if (ht(iL,j,k+1) .lt. interheight) then
+c            val2 = den(iL,j,k+1) +
+c     *     ((interheight-ht(iL,j,k+1))/(ht(iL+1,j,k+1)-ht(iL,j,k+1)))*
+c     *           (den(iL+1,j,k+1)-den(iL,j,k+1))
+c          else
+c            val2 = den(iL,j,k+1) +
+c     *     ((interheight-ht(iL,j,k+1))/(ht(iL-1,j,k+1)-ht(iL,j,k+1)))*
+c     *           (den(iL-1,j,k+1)-den(iL,j,k+1))
+c          endif
+c          val2 = val2*1.0E11
+c          if (ht(iL,j+1,k) .lt. interheight) then
+c            val3 = den(iL,j+1,k) +
+c     *      ((interheight-ht(iL,j+1,k))/(ht(iL+1,j+1,k)-ht(iL,j+1,k)))*
+c     *           (den(iL+1,j+1,k)-den(iL,j+1,k))
+c          else
+c            val3 = den(iL,j+1,k) +
+c     *     ((interheight-ht(iL,j+1,k))/(ht(iL-1,j+1,k)-ht(iL,j+1,k)))*
+c     *           (den(iL-1,j+1,k)-den(iL,j+1,k))
+c          endif
+c          val3 = val3*1.0E11
+c          if (ht(iL,j+1,k+1) .lt. interheight) then
+c            val4 = den(iL,j+1,k+1) +
+c     * ((interheight-ht(iL,j+1,k+1))/(ht(iL+1,j+1,k+1)-ht(iL,j+1,k+1)))*
+c     *           (den(iL+1,j+1,k+1)-den(iL,j+1,k+1))
+c          else
+c            val4 = den(iL,j+1,k+1) +
+c     * ((interheight-ht(iL,j+1,k+1))/(ht(iL-1,j+1,k+1)-ht(iL,j+1,k+1)))*
+c     *           (den(iL-1,j+1,k+1)-den(iL,j+1,k+1))
+c          endif
+c          val4 = val4*1.0E11
+c          rate1=(long-18*int(long/18))/18.0
+c          val12=val1+(val2-val1)*rate1
+c          val34=val3+(val4-val3)*rate1
+c          rate2=(lat-2*int(lat/2))/2.0
+c          znden1 = val12+(val34-val12)*rate2
+cc     error handeling for times it passes over the cap which ins't calculated
+cc     or for times the satellite is at the edge of the grid and we can't interpolate
+cc     these aren't very pretty and I hope that they are accurate
+c      if (znden1 .lt. 0) then
+c      print*,"density is negative interpolation error -999.999999"
+c      znden1 = -999.999
+c      goto 189
 c      endif
-c      if (i .eq. altnum-2 )then !.and. (j-1)*2 .le. 90) then
-c         write (22,*)(6731+(ht(I,J,K)/1000))*sin(the)*cos(phi),
-c     1(6731+(ht(I,J,K)/1000))*sin(the)*sin(phi),den(I,J,K)-denb(I,J,K),
-c     2(6731+(ht(I,J,K)/1000))*cos(the)
+c      if (znden1 .lt. 0.09) then
+c      print*,"on edge of boundary at 89 deg so -999.999999"
+c      znden1 = -999.999
+c      goto 189
 c      endif
-cccc end of difference plot stuff
-      enddo
-      enddo
-      close(unit=24)
-      close(unit=25)
-      close(unit=26)
+c      if (den(il,J,K) .lt. 1E-20) then
+c      print*,"Density is too small, probably at boundary -999.999999"
+c      znden1 = -999.999
+c      goto 189
+c      endif
+c      if(ht(iL,j,k) .lt. interheight .and. iL .eq.15)then
+c      print*,"sat is outside of interpolatable grid, -999.999999"
+c      znden1 = -999.999
+c      endif
+c 189  continue
+c      print*,"here is the density ", den(iL,J,K)*1.0E11
+c     1," at ",ht(iL,j,k)
+c          print*,"here is the interpolated density ", znden1
+c      print*,"here is the density ", den(iL+1,J,K)*1.0E11,
+c     1" at  ", ht(iL+1,j,k)
+c          if (I .eq. 5) then          
+c          open(unit=30, file="Grace1_interpolated.txt",access="append")
+c          write(30,*)timenuminit,lat,long,interheight/1000.0,znden1
+c          close(unit=30)
+c          endif
+c          if (I .eq. 6) then          
+c          open(unit=30, file="Grace2_interpolated.txt",access="append")
+c          write(30,*)timenuminit,lat,long,interheight/1000.0,znden1
+c          close(unit=30)
+c          endif
+c      write(29,*)satname(i),xgeo*6731,ygeo*6731,zgeo*6731,znden1 !write sats position geo
+c      write(28,*)satname(i),satx(i)*6731,saty(i)*6731,satz(i)*6731,
+c     1znden1 !write sats position gse
+c      endif
       stop
       end
 

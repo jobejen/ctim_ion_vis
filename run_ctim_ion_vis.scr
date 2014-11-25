@@ -9,25 +9,25 @@
 num=000000
 #selects the variable you want to look at code will probably need to be 
 #modified if you select anything other than density
-varn=CTIM_oprod_rate_nprec_3D_GEO
-vary=CTIM_oprod_rate_yprec_3D_GEO
-#a background file that you can select to be subtracted from all the files (might need fixing)
-back="/home/joe/trillian/storm_2011_08_04_v6/storm-2014-AUG-05-jr12/target/storm_2011_08_04_v2.ioc.000300"
-#This selects the altitude/pressure slice to be used in graphing (ranges from 1-15 ~80-500km)
+var1=CTIM_zkmheight_3D_GEO
+var2=CTIM_oprod_rate_nprec_3D_GEO
+var3=CTIM_o2prod_rate_nprec_3D_GEO
+var4=CTIM_n2prod_rate_nprec_3D_GEO
+var5=CTIM_oprod_rate_yprec_3D_GEO
+var6=CTIM_o2prod_rate_yprec_3D_GEO
+var7=CTIM_n2prod_rate_yprec_3D_GEO
+####run the ctim_vis.f####
 
-
-####run the iof3d_read_interp_v2.f####
-
-#clear out a file used to graph the expected values of satellite measurements
-rm Grace2_interpolated.txt Grace1_interpolated.txt
 #get the ioc files you can select just one, or the whole list
-for a in /home/space/jobejen/jobejen/scratch/tsmall/target/*ioc*.*; do
-#for a in /home/joe/trillian/storm_2011_08_04_v4/storm-2014-AUG-05-jr12/target/storm-2014-AUG-05-jr12.ioc.013260; do
+for a in /home/joe/trillian/storm_2011_08_04_v6_ion/target/*ioc*.*; do
+#for a in /home/joe/trillian/storm_2011_08_04_v6_ion/target/storm_2011_08_04_v6_ion.ioc.228420; do
+#for a in /home/joe/trillian/scratch/tsmall/target/*ioc*.*; do
+#for a in /home/joe/trillian/scratch/tsmall/target/*ioc*600; do
 
 #compile the code if you need
-#gfortran -o iof3d_read_interp_v2.x iof3d_read_interp_v2.f
+#gfortran -o ctim_vis.x ctim_vis.f
 #run the program note that this will loop for as many ioc files and you sent it
-./ctim_sat_interp.x $a $back $varn $vary $num
+./ctim_vis.x $a $var1 $var2 $var3 $var4 $var5 $var6 $var7 $num
 #make the plots
 
 ####graph the data####
@@ -35,45 +35,75 @@ for a in /home/space/jobejen/jobejen/scratch/tsmall/target/*ioc*.*; do
 #create the gnuplot file to graph !!!make sure you check where the output file goes!!!
 
 cat > tmp.gnu <<EOF
-reset 
 set terminal pngcairo size 1000,1000 enhanced font 'Verdana,14'
-set output '/mnt/storage/tsmall/moviefiles/multi-$var-`printf "%06d" $num`.png'
-
-set pm3d depthorder 
-set hidden3d front
-#set view 15,20
-
-unset key
-set multiplot layout 2,2 title "Altitude/pressure slice neutral density $num"
+set output '/home/joe/storage/storm_2011_08_04_v6_ion/moviefiles/ionrates_polar_E9-`printf "%06d" $num`.png'
+reset
+set multiplot layout 3,2 title "Particle precipitation ionization rates 150km $num "
+#set xrange [0:75]
+set xlabel "Xgse"
+set ylabel "Ygse"
+set pm3d depthorder                       
+set hidden3d front 
+r = 7000.                                                                                           
+rz= 8000.                                                                                            
+set xrange[-r:r]                                                                                     
+set yrange[-r:r]                                                                                     
+set zrange[-rz:rz]
+set key outside
 set palette rgb 33,13,10 #rainbow (blue-green-yellow-red)
 set format cb "%1.1t{/Symbol \327}10^{%S}"
-r = 10000.
-rz= 8000.
-set xrange[-r:r]
-set yrange[-r:r]
-set zrange[-rz:rz]
-set xlabel "x"
-set ylabel "y"
-set cbrange[1.0E-12:1.8E-11]
+set logscale cb
+set cbrange[1E5:1E9]
 
-set title "GSE north pole"
-set view 0,0
-splot 'data_altslice.txt' using 4:5:6:7 with pm3d,'orbits_sattraj_gse.txt' using 2:3:4:(\$5*1.0E-11) with points pt 5 lc palette
 
-set title "GSE south pole"
-set view 180,0
-splot 'data_altslice.txt' using 4:5:6:7 with pm3d,'orbits_sattraj_gse.txt' using 2:3:4:(\$5*1.0E-11) with points pt 5 lc palette
+unset ztics
+set view 0,0,1.75                                                                                 
+splot 'alt_slice_k-10.txt' using 1:2:3:(\$12-\$9) with pm3d title "O2 N-P"
 
-set title "GSE day side "
-set view 90,90
-splot 'data_altslice.txt' using 4:5:6:7 with pm3d,'orbits_sattraj_gse.txt' using 2:3:4:(\$5*1.0E-11) with points pt 5 lc palette
+set view 180,0,1.75                                                                                 
+splot 'alt_slice_k-10.txt' using 1:2:3:(\$12-\$9) with pm3d title "O2 S-P"
 
-set title "GSE dawn side "
-set view 90,180
-splot 'data_altslice.txt' using 4:5:6:7 with pm3d,'orbits_sattraj_gse.txt' using 2:3:4:(\$5*1.0E-11) with points pt 5 lc palette
+set view 0,0,1.75
+splot 'alt_slice_k-10.txt' using 1:2:3:(\$11-\$8) with pm3d title "O N-P"
 
-unset multiplot
+set view 180,0,1.75
+splot 'alt_slice_k-10.txt' using 1:2:3:(\$11-\$8) with pm3d title "O S-P"
+
+set view 0,0,1.75                                                                                 
+splot 'alt_slice_k-10.txt' using 1:2:3:(\$13-\$10) with pm3d  title "N2 N-P"
+
+set view 180,0,1.75
+splot 'alt_slice_k-10.txt' using 1:2:3:(\$13-\$10) with pm3d title "N2 S-P"
 EOF
+
+#
+#reset 
+#set terminal pngcairo size 1000,1000 enhanced font 'Verdana,14'
+#set output '/home/joe/storage/storm_2011_08_04_v6_ion/moviefiles/ionrates-`printf "%06d" $num`.png'
+#set multiplot layout 2,2 title "4-longitudinal slice at time $num"
+#unset key
+#set xrange [0:182]
+#set xlabel "Colatitude"
+#set ylabel "Altitude (km)"
+#set yrange [80:800]
+#unset ztics
+#set palette rgb 33,13,10 #rainbow (blue-green-yellow-red)
+#set format cb "%1.1t{/Symbol \327}10^{%S}"
+#set logscale cb
+#set cbrange[1E6:5E8]
+
+#set view 0,0
+#set title "0{/Symbol \260} longitude"
+#splot 'long_slice_000.txt' using (\$1*2):4:(\$8-\$5) with pm3d 
+#set title "90{/Symbol \260} longitude"
+#splot 'long_slice_090.txt' using (\$1*2):4:(\$8-\$5) with pm3d 
+#set title "180{/Symbol \260} longitude"
+#splot 'long_slice_180.txt' using (\$1*2):4:(\$8-\$5) with pm3d
+#set title "270{/Symbol \260} longitude"
+#splot 'long_slice_270.txt' using (\$1*2):4:(\$8-\$5) with pm3d
+#splot 'alt_slice_k-10.txt' using (\$1*2):4:(\$8-\$5) with pm3d
+#splot 'long_slice_20.txt' using (\$1*2):4:5 with pm3d
+#EOF
 
 gnuplot tmp.gnu
 
@@ -81,16 +111,3 @@ gnuplot tmp.gnu
 let "num = $num + 60"
 done
 
-#this plots a line plot of the expected neutral density along the path of the satellite
-cat > tmp.gnu <<EOF
-reset
-set terminal pngcairo size 1000,1000 enhanced font 'Verdana,14'
-set output "test_grace_plots.png"
-set xlabel "Time (hrs from start)"
-set ylabel "density(*1.0E11)"
-set title "Expected Grace neutral density measurements"
-plot "Grace1_interpolated.txt" using (\$1/3600):5 with lines title "Grace 1","Grace2_interpolated.txt" using (\$1/3600):5 with lines title "Grace 2"
-
-EOF
-
-gnuplot tmp.gnu
