@@ -1,0 +1,96 @@
+#!/bin/bash
+#uses the program iof3d_read_interp_v2.f to read through *ioc* files and graphs
+# the data using gnuplot
+# Joseph B. Jensen july 2014
+
+####variables section####
+
+#controls the file time stamp increments by 60 each time it is run
+num=000000
+#selects the variable you want to look at code will probably need to be 
+#modified if you select anything other than density
+varn=CTIM_oprod_rate_nprec_3D_GEO
+vary=CTIM_oprod_rate_yprec_3D_GEO
+#a background file that you can select to be subtracted from all the files (might need fixing)
+back="/home/joe/trillian/storm_2011_08_04_v6/storm-2014-AUG-05-jr12/target/storm_2011_08_04_v2.ioc.000300"
+#This selects the altitude/pressure slice to be used in graphing (ranges from 1-15 ~80-500km)
+
+
+####run the iof3d_read_interp_v2.f####
+
+#clear out a file used to graph the expected values of satellite measurements
+rm Grace2_interpolated.txt Grace1_interpolated.txt
+#get the ioc files you can select just one, or the whole list
+for a in /home/space/jobejen/jobejen/scratch/tsmall/target/*ioc*.*; do
+#for a in /home/joe/trillian/storm_2011_08_04_v4/storm-2014-AUG-05-jr12/target/storm-2014-AUG-05-jr12.ioc.013260; do
+
+#compile the code if you need
+#gfortran -o iof3d_read_interp_v2.x iof3d_read_interp_v2.f
+#run the program note that this will loop for as many ioc files and you sent it
+./ctim_sat_interp.x $a $back $varn $vary $num
+#make the plots
+
+####graph the data####
+
+#create the gnuplot file to graph !!!make sure you check where the output file goes!!!
+
+cat > tmp.gnu <<EOF
+reset 
+set terminal pngcairo size 1000,1000 enhanced font 'Verdana,14'
+set output '/mnt/storage/tsmall/moviefiles/multi-$var-`printf "%06d" $num`.png'
+
+set pm3d depthorder 
+set hidden3d front
+#set view 15,20
+
+unset key
+set multiplot layout 2,2 title "Altitude/pressure slice neutral density $num"
+set palette rgb 33,13,10 #rainbow (blue-green-yellow-red)
+set format cb "%1.1t{/Symbol \327}10^{%S}"
+r = 10000.
+rz= 8000.
+set xrange[-r:r]
+set yrange[-r:r]
+set zrange[-rz:rz]
+set xlabel "x"
+set ylabel "y"
+set cbrange[1.0E-12:1.8E-11]
+
+set title "GSE north pole"
+set view 0,0
+splot 'data_altslice.txt' using 4:5:6:7 with pm3d,'orbits_sattraj_gse.txt' using 2:3:4:(\$5*1.0E-11) with points pt 5 lc palette
+
+set title "GSE south pole"
+set view 180,0
+splot 'data_altslice.txt' using 4:5:6:7 with pm3d,'orbits_sattraj_gse.txt' using 2:3:4:(\$5*1.0E-11) with points pt 5 lc palette
+
+set title "GSE day side "
+set view 90,90
+splot 'data_altslice.txt' using 4:5:6:7 with pm3d,'orbits_sattraj_gse.txt' using 2:3:4:(\$5*1.0E-11) with points pt 5 lc palette
+
+set title "GSE dawn side "
+set view 90,180
+splot 'data_altslice.txt' using 4:5:6:7 with pm3d,'orbits_sattraj_gse.txt' using 2:3:4:(\$5*1.0E-11) with points pt 5 lc palette
+
+unset multiplot
+EOF
+
+gnuplot tmp.gnu
+
+#increment by 60 !!!!this needs to be changed if you have a different time step!!!!
+let "num = $num + 60"
+done
+
+#this plots a line plot of the expected neutral density along the path of the satellite
+cat > tmp.gnu <<EOF
+reset
+set terminal pngcairo size 1000,1000 enhanced font 'Verdana,14'
+set output "test_grace_plots.png"
+set xlabel "Time (hrs from start)"
+set ylabel "density(*1.0E11)"
+set title "Expected Grace neutral density measurements"
+plot "Grace1_interpolated.txt" using (\$1/3600):5 with lines title "Grace 1","Grace2_interpolated.txt" using (\$1/3600):5 with lines title "Grace 2"
+
+EOF
+
+gnuplot tmp.gnu
