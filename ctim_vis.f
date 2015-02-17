@@ -156,7 +156,7 @@ c     satellites position and outputs the data in a form for gnuplot to plot the
 c     Joseph B Jensen july 2014
 c
       real den(15,91,20),ht(15,91,20),denb(15,91,20)
-      real zkmheight(90,90,20),oprod_rate_nprec(90,90,20)
+      real var1(90,90,20),oprod_rate_nprec(90,90,20)
       real o2prod_rate_nprec(90,90,20),n2prod_rate_nprec(90,90,20)
       real oprod_rate_yprec(90,90,20),o2prod_rate_yprec(90,90,20)
       real n2prod_rate_yprec(90,90,20)
@@ -177,24 +177,27 @@ c     get the file name of the ioc file to read in the data
       call getarg(1,f3d)
       open(10,file=f3d,status='old')
 c     get the variables to look at (e.g. density or electron energy)
-      do I=1,7
+      do I=1,10
       call getarg(I+1,l1(I))
       enddo
 c     get the altitude/pressure height layer (1-15)
-      call getarg(9,chtimenum) 
+      call getarg(12,chtimenum) 
 c     convert to an integer
       read (chtimenum,'(I10)') timenum
       timenuminit=timenum
       print*,"timemun= ",timenum
 c     read the l1 from the ioc file
 
-      call getf31(10,zkmheight,nnx,nny,nnz,l1(1),l2,it)
-      call getf31(10,oprod_rate_nprec,nnx,nny,nnz,l1(2),l2,it)
-      call getf31(10,o2prod_rate_nprec,nnx,nny,nnz,l1(3),l2,it)
-      call getf31(10,n2prod_rate_nprec,nnx,nny,nnz,l1(4),l2,it)
-      call getf31(10,oprod_rate_yprec,nnx,nny,nnz,l1(5),l2,it)
-      call getf31(10,o2prod_rate_yprec,nnx,nny,nnz,l1(6),l2,it)
-      call getf31(10,n2prod_rate_yprec,nnx,nny,nnz,l1(7),l2,it)
+      call getf31(10,var1,nnx,nny,nnz,l1(1),l2,it)
+      call getf31(10,var2,nnx,nny,nnz,l1(2),l2,it)
+      call getf31(10,var3,nnx,nny,nnz,l1(3),l2,it)
+      call getf31(10,var4,nnx,nny,nnz,l1(4),l2,it)
+      call getf31(10,var5,nnx,nny,nnz,l1(5),l2,it)
+      call getf31(10,var6,nnx,nny,nnz,l1(6),l2,it)
+      call getf31(10,var7,nnx,nny,nnz,l1(7),l2,it)
+      call getf31(10,var8,nnx,nny,nnz,l1(7),l2,it)
+      call getf31(10,var9,nnx,nny,nnz,l1(7),l2,it)
+      call getf31(10,var10,nnx,nny,nnz,l1(7),l2,it)
 
 
 !!!! get the imte right to make transformations
@@ -251,25 +254,25 @@ c     longitude slice of the ionization rates
 c     create xyz geo coordinates
                the=(I-1)*2.*(3.14159/180)
                phi=(mod((((j-1)*18.)+180.0),360.0)-180)*(3.14159/180)
-               R=6731+(zkmheight(K,I,J)/1000)
-       xgeo=(6731+(zkmheight(K,I,J)/1000))*sin(the)*cos(phi)
-       ygeo=(6731+(zkmheight(K,I,J)/1000))*sin(the)*sin(phi)
-       zgeo=(6731+(zkmheight(K,I,J)/1000))*cos(the)
+               R=6731+(var1(K,I,J)/1000)
+       xgeo=(6731+(var1(K,I,J)/1000))*sin(the)*cos(phi)
+       ygeo=(6731+(var1(K,I,J)/1000))*sin(the)*sin(phi)
+       zgeo=(6731+(var1(K,I,J)/1000))*cos(the)
 c     print out a polar profile
 
           call ctim_cotr('geo','gse',xgeo,ygeo,zgeo,xgse,ygse,zgse)
-          write(117,*)xgeo,ygeo,zgeo,xgse,ygse,zgse,zkmheight(k,I,J),
+          write(117,*)xgeo,ygeo,zgeo,xgse,ygse,zgse,var1(k,I,J),
      1oprod_rate_nprec(k,I,J),o2prod_rate_nprec(k,I,J),
      2n2prod_rate_nprec(k,I,J),oprod_rate_yprec(k,I,J),
      3o2prod_rate_yprec(k,I,J),n2prod_rate_yprec(k,I,J),I,J,K
           if (J .eq. 20) then 
                the=(I-1)*2.*(3.14159/180)
                phi=(mod((((1-1)*18.)+180.0),360.0)-180)*(3.14159/180)
-               R=6731+(zkmheight(K,I,1)/1000)
-       xgeo=(6731+(zkmheight(K,I,1)/1000))*sin(the)*cos(phi)
-       ygeo=(6731+(zkmheight(K,I,1)/1000))*sin(the)*sin(phi)
-       zgeo=(6731+(zkmheight(K,I,1)/1000))*cos(the)
-             write(117,*)xgeo,ygeo,zgeo,xgse,ygse,zgse,zkmheight(k,I,1),
+               R=6731+(var1(K,I,1)/1000)
+       xgeo=(6731+(var1(K,I,1)/1000))*sin(the)*cos(phi)
+       ygeo=(6731+(var1(K,I,1)/1000))*sin(the)*sin(phi)
+       zgeo=(6731+(var1(K,I,1)/1000))*cos(the)
+             write(117,*)xgeo,ygeo,zgeo,xgse,ygse,zgse,var1(k,I,1),
      1oprod_rate_nprec(k,I,1),o2prod_rate_nprec(k,I,1),
      2n2prod_rate_nprec(k,I,1),oprod_rate_yprec(k,I,1),
      3o2prod_rate_yprec(k,I,1),n2prod_rate_yprec(k,I,1),I,J,K
@@ -277,25 +280,25 @@ c     print out a polar profile
        endif
 c     now print out lat slices
                if (j .eq. 1) then
-      write(101,*)I,J,K,zkmheight(k,I,J),oprod_rate_nprec(k,I,J),
+      write(101,*)I,J,K,var1(k,I,J),oprod_rate_nprec(k,I,J),
      1o2prod_rate_nprec(k,I,J),n2prod_rate_nprec(k,I,J),
      2oprod_rate_yprec(k,I,J),o2prod_rate_yprec(k,I,J),
      3n2prod_rate_yprec(k,I,J)
               endif
                if (j .eq. 6) then
-      write(106,*)I,J,K,zkmheight(k,I,J),oprod_rate_nprec(k,I,J),
+      write(106,*)I,J,K,var1(k,I,J),oprod_rate_nprec(k,I,J),
      1o2prod_rate_nprec(k,I,J),n2prod_rate_nprec(k,I,J),
      2oprod_rate_yprec(k,I,J),o2prod_rate_yprec(k,I,J),
      3n2prod_rate_yprec(k,I,J)
                endif
                if (j .eq. 11) then
-      write(111,*)I,J,K,zkmheight(k,I,J),oprod_rate_nprec(k,I,J),
+      write(111,*)I,J,K,var1(k,I,J),oprod_rate_nprec(k,I,J),
      1o2prod_rate_nprec(k,I,J),n2prod_rate_nprec(k,I,J),
      2oprod_rate_yprec(k,I,J),o2prod_rate_yprec(k,I,J),
      3n2prod_rate_yprec(k,I,J)
                endif
                if (j .eq. 16) then
-      write(116,*)I,J,K,zkmheight(k,I,J),oprod_rate_nprec(k,I,J),
+      write(116,*)I,J,K,var1(k,I,J),oprod_rate_nprec(k,I,J),
      1o2prod_rate_nprec(k,I,J),n2prod_rate_nprec(k,I,J),
      2oprod_rate_yprec(k,I,J),o2prod_rate_yprec(k,I,J),
      3n2prod_rate_yprec(k,I,J)
@@ -323,14 +326,14 @@ c     now print out lat slices
 c     create xyz geo coordinates                                                                  
             the=(I-1)*2.*(3.14159/180)
             phi=(mod((((j-1)*18.)+180.0),360.0)-180)*(3.14159/180)
-            R=6731+(zkmheight(K,I,J)/1000)
-            xgeo=(6731+(zkmheight(K,I,J)/1000))*sin(the)*cos(phi)
-            ygeo=(6731+(zkmheight(K,I,J)/1000))*sin(the)*sin(phi)
-            zgeo=(6731+(zkmheight(K,I,J)/1000))*cos(the)
+            R=6731+(var1(K,I,J)/1000)
+            xgeo=(6731+(var1(K,I,J)/1000))*sin(the)*cos(phi)
+            ygeo=(6731+(var1(K,I,J)/1000))*sin(the)*sin(phi)
+            zgeo=(6731+(var1(K,I,J)/1000))*cos(the)
 c     print out a polar profile                                                                     
             
             call ctim_cotr('geo','gse',xgeo,ygeo,zgeo,xgse,ygse,zgse)
-c          write(117,*)xgeo,ygeo,zgeo,xgse,ygse,zgse,zkmheight(k,I,J),
+c          write(117,*)xgeo,ygeo,zgeo,xgse,ygse,zgse,var1(k,I,J),
 c     1oprod_rate_nprec(k,I,J),o2prod_rate_nprec(k,I,J),
 c     2n2prod_rate_nprec(k,I,J),oprod_rate_yprec(k,I,J),
 c     3o2prod_rate_yprec(k,I,J),n2prod_rate_yprec(k,I,J),I,J,K
