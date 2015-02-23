@@ -20,19 +20,19 @@ var8=CTIM_zkmheight_3D_GEO
 var9=CTIM_oprod_rate_nprec_3D_GEO
 var10=CTIM_oprod_rate_yprec_3D_GEO
 
+#compile the code if you need
+gfortran -o ctim_vis_joule.x ctim_vis_joule.f
+
 ####run the ctim_vis.f####
 yes_no=yes
 #get the ioc files you can select just one, or the whole list
-for a in /home/joe/trillian/wenhui_storms/storm_2004_11_07_`printf $yes_no`_precipitation/target/storm_2004_11_07_`printf $yes_no`_precipitation.ioc.004680; do
+for a in /home/joe/trillian/wenhui_storms/storm_2004_11_07_`printf $yes_no`_precipitation/target/storm_2004_11_07_`printf $yes_no`_precipitation.ioc.046080; do
 #for a in /home/joe/graphs/storm_2004_11_07_yes_precipitation.ioc.050400; do
 #for a in /home/joe/trillian/scratch/tsmall/target/*ioc*.*; do
 #for a in /home/joe/trillian/scratch/tsmall/target/*ioc*600; do
 
-#compile the code if you need
-gfortran -o ctim_vis_joule.x ctim_vis_joule.f
 #run the program note that this will loop for as many ioc files and you sent it
 ./ctim_vis_joule.x $a $var1 $var2 $var3 $var4 $var5 $var6 $var7 $var8 $var9 $var10 $num $yes_no
-
 
 #get the ioc files you can select just one, or the whole list
 #b=/home/joe/graphs/storm_2004_11_07_no_precipitation.ioc.050400
@@ -48,8 +48,6 @@ b=/home/joe/trillian/wenhui_storms/storm_2004_11_07_`printf $yes_no`_precipitati
 #for a in /home/joe/trillian/scratch/tsmall/target/*ioc*600; do
 
 yes_no=noo
-#compile the code if you need
-gfortran -o ctim_vis_joule.x ctim_vis_joule.f
 #run the program note that this will loop for as many ioc files and you sent it
 ./ctim_vis_joule.x $b $var1 $var2 $var3 $var4 $var5 $var6 $var7 $var8 $var9 $var10 $num $yes_no
 #make the plots
@@ -62,7 +60,7 @@ cat > tmp1.gnu <<EOF
 #set terminal postscript enhanced color "Times-Roman" 22 size 15,15
 #set output '/home/joe/graphs/movies/alts-`printf "%06d" $num`.ps'
 set terminal pngcairo enhanced color font "Veranda,22" size 1000,1000
-set output '/home/joe/trillian/scratch/laptop/ctim_ion_vis/movies/alts_aldeny-`printf "%06d" $num`.png'
+set output '/home/joe/storage/albuquerque/alts_aldeny-`printf "%06d" $num`.png'
 reset
 set multiplot title "Electron Density at 115km Including Precipitation"
 #set xrange [0:75]
@@ -228,7 +226,7 @@ reset
 #set terminal postscript enhanced color "Times-Roman" 22 size 15,10
 #set output '/home/joe/trillian/scratch/laptop/ctim_ion_vis/movies/longs-`printf "%06d" $num`.ps'
 set terminal pngcairo enhanced color font "Veranda,22" size 1500,1000
-set output '/home/joe/trillian/scratch/laptop/ctim_ion_vis/movies/longs-`printf "%06d" $num`.png'
+set output '/home/joe/storage/albuquerque/longs-`printf "%06d" $num`.png'
 set multiplot layout 1,2 title
 unset key
 #set xrange [-60:60]
