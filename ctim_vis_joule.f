@@ -190,37 +190,37 @@ c     convert to an integer
 c     read the l1 from the ioc file
 
       call getf31(10,ht,nnx,nny,nnz,l1(1),l2,it)
-      print*,"1"
+c      print*,"1"
       call getf31(10,alden,nnx,nny,nnz,l1(2),l2,it)
-      print*,"2"
+c      print*,"2"
       call getf31(10,hallc,nnx,nny,nnz,l1(3),l2,it)
-      print*,"3"
+c      print*,"3"
       call getf31(10,pedc,nnx,nny,nnz,l1(4),l2,it)
-      print*,"4"
+c      print*,"4"
       call getf31(10,joule,nnx,nny,nnz,l1(5),l2,it)
-      print*,"5"
+c      print*,"5"
       call getf31(10,jdenx,nnx,nny,nnz,l1(6),l2,it)
-      print*,"6"
+c      print*,"6"
       call getf31(10,jdeny,nnx,nny,nnz,l1(7),l2,it)
-      print*,"7"
+c      print*,"7"
       call getf31(10,zkmheight,nnx,nny,nnz,l1(8),l2,it)
-      print*,"8"
+c      print*,"8"
       call getf31(10,oprod_rate_nprec,nnx,nny,nnz,l1(9),l2,it)
-      print*,"9"
+c      print*,"9"
       call getf31(10,oprod_rate_yprec,nnx,nny,nnz,l1(10),l2,it)
-      print*,"10"
+c      print*,"10"
       
 !!!! get the imte right to make transformations
 c     we need to initialize the coordinate transformation program by calling ctim_cotr_set
 c     this !!!WILL HAVE PROBLEMS!! for ends of months and end of years, I'll get to it when I need it
-      syear=2011
-      smonth=8
-      sday=4
-      shour=12
+      syear=2004
+      smonth=11
+      sday=7
+      shour=6
       sminute=00
       ssecond=00.00
-      nyear=2011
-      nmonth=8
+      nyear=2004
+      nmonth=11
       nday=-1
       nhour=-1
       nminute=-1
@@ -264,25 +264,27 @@ c     longitude slice of the ionization rates
        if (K .eq. 8)then
 c     create xyz geo coordinates
                the=(I-1)*2.*(3.14159/180)
-               phi=(mod((((j-1)*18.)+180.0),360.0)-180)*(3.14159/180)
+c               phi=(mod((((j-1)*18.)+180.0),360.0)-180)*(3.14159/180)   CCC not sure about this one
+               phi=((j-1)*18.)*(3.14159/180)-3.14159
                R=6731+(ht(K,I,J)/1000)
        xgeo=(6731+(ht(K,I,J)/1000))*sin(the)*cos(phi)
        ygeo=(6731+(ht(K,I,J)/1000))*sin(the)*sin(phi)
        zgeo=(6731+(ht(K,I,J)/1000))*cos(the)
 c     print out a polar profile
-          call ctim_cotr('geo','gse',xgeo,ygeo,zgeo,xgse,ygse,zgse)
+          call ctim_cotr('geo','sm',xgeo,ygeo,zgeo,xgse,ygse,zgse)
           write(117,*)xgeo,ygeo,zgeo,xgse,ygse,zgse,ht(k,I,J),
      1alden(k,I,J),hallc(k,I,J),pedc(k,i,j),joule(k,i,j),jdenx(k,i,j),
      2jdeny(k,I,J),i,j,k
 c     add the last slice so it closes
           if (J .eq. 20) then 
                the=(I-1)*2.*(3.14159/180)
-               phi=(mod((((1-1)*18.)+180.0),360.0)-180)*(3.14159/180)
+c               phi=(mod((((1-1)*18.)+180.0),360.0)-180)*(3.14159/180)
+               phi=((0)*18.)*(3.14159/180)-3.14159
                R=6731+(ht(K,I,1)/1000)
        xgeo=(6731+(ht(K,I,1)/1000))*sin(the)*cos(phi)
        ygeo=(6731+(ht(K,I,1)/1000))*sin(the)*sin(phi)
        zgeo=(6731+(ht(K,I,1)/1000))*cos(the)
-          call ctim_cotr('geo','gse',xgeo,ygeo,zgeo,xgse,ygse,zgse)
+          call ctim_cotr('geo','sm',xgeo,ygeo,zgeo,xgse,ygse,zgse)
           write(117,*)xgeo,ygeo,zgeo,xgse,ygse,zgse,ht(k,I,J),
      1alden(k,I,J),hallc(k,I,J),pedc(k,i,j),joule(k,i,j),jdenx(k,i,j),
      2jdeny(k,I,J),i,j,k

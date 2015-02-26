@@ -1,0 +1,128 @@
+#!/bin/bash
+#uses the program iof3d_read_interp_v2.f to read through *ioc* files and graphs
+# the data using gnuplot
+# Joseph B. Jensen july 2014
+
+####variables section####
+
+#controls the file time stamp increments by 60 each time it is run
+num=000000
+#selects the variable you want to look at code will probably need to be 
+#modified if you select anything other than density
+var1=CTIM_HT_3D_GEO 
+var2=CTIM_ALDEN_3D_GEO
+var3=CTIM_hallc_3D_GEO
+var4=CTIM_pedc_3D_GEO
+var5=CTIM_joule_3D_GEO 
+var6=CTIM_jdenx_3D_GEO
+var7=CTIM_jdeny_3D_GEO
+var8=CTIM_zkmheight_3D_GEO
+var9=CTIM_oprod_rate_nprec_3D_GEO
+var10=CTIM_oprod_rate_yprec_3D_GEO
+
+#compile the code if you need
+#gfortran -o ctim_vis_joule.x ctim_vis_joule.f
+
+####run the ctim_vis.f####
+yes_no=yes
+#get the ioc files you can select just one, or the whole list
+for a in /home/joe/trillian/wenhui_storms/storm_2004_11_07_`printf $yes_no`_precipitation/target/storm_2004_11_07_`printf $yes_no`_precipitation.ioc.046080; do
+#for a in /home/joe/trillian/wenhui_storms/storm_2004_11_07_`printf $yes_no`_precipitation/target/storm_2004_11_07_`printf $yes_no`_precipitation.ioc.*; do
+
+#run the program note that this will loop for as many ioc files and you sent it
+./ctim_vis_joule.x $a $var1 $var2 $var3 $var4 $var5 $var6 $var7 $var8 $var9 $var10 $num $yes_no
+
+#get the ioc files you can select just one, or the whole list
+#b=/home/joe/graphs/storm_2004_11_07_no_precipitation.ioc.050400
+### this is for precipitation turned on with fudge factors removed
+#yes_no=yes_fixfak
+#b=/home/joe/trillian/wenhui_storms/storm_2004_11_07_`printf $yes_no`_precipitation/target/storm_2004_11_07_`printf $yes_no`_precipitation.ioc.004680
+
+#### this is for precipitation turned off
+#yes_no=none
+#b=/home/joe/trillian/wenhui_storms/storm_2004_11_07_`printf $yes_no`_precipitation/target/storm_2004_11_07_`printf $yes_no`_precipitation.ioc.046080
+#for a in /home/joe/trillian/wenhui_storms/storm_2004_11_07_`printf $yes_no`_precipitation/target/storm_2004_11_07_`printf $yes_no`_precipitation.ioc.046080; do
+#for a in /home/joe/trillian/scratch/tsmall/target/*ioc*.*; do
+#for a in /home/joe/trillian/scratch/tsmall/target/*ioc*600; do
+
+#yes_no=noo
+#run the program note that this will loop for as many ioc files and you sent it
+#./ctim_vis_joule.x $b $var1 $var2 $var3 $var4 $var5 $var6 $var7 $var8 $var9 $var10 $num $yes_no
+#make the plots
+
+####graph the data####
+
+#create the gnuplot file to graph !!!make sure you check where the output file goes!!!
+
+cat > tmp2.gnu <<EOF
+reset
+set terminal pngcairo enhanced color font "Veranda,22" size 1000,1000
+#set output '/home/joe/storage/albuquerque/polar_SM_fix-`printf "%06d" $num`.png'
+set output 'polar_SM_fix-`printf "%06d" $num`.png'
+set multiplot title "Electron Density at 150km Including Precipitation SM"
+set pm3d depthorder
+set hidden3d
+r = 5700.
+rz= 8000.
+set xrange[-r:r]
+set yrange[-r:r]
+set zrange[2000:rz]
+set cbrange[1E8:5E12]
+set cblabel "Electron Precipitation"
+set palette rgb 33,13,10 #rainbow (blue-green-yellow-red)
+#set format cb "%1.1t{/Symbol \327}10^{%S}"
+#set format cb "%1.1t10^{%S}"
+set logscale cb
+
+set lmargin at screen .05
+set rmargin at screen .75
+set bmargin at screen .15
+set tmargin at screen .85
+
+unset key
+unset ylabel
+unset ytics
+unset xlabel
+#unset xtics
+#unset ztics
+#unset border
+
+#north pole
+set view 360,270,1.00
+#south pole
+#set view 0,0,1.0
+
+#gse
+splot 'alt_slice_k-10yes.txt' using 4:5:6:(\$8) with pm3d
+#geo
+#splot 'alt_slice_k-10yes.txt' using 1:2:3:(\$8) with pm3d
+
+## make cirles to clean the edges of the plot
+
+#set object circle at first 0,0 front size 4836,4836 
+#set style fill solid
+#set object circle at first 0,0 front size 8000,8000 fillstyle rgb "white"
+
+## now make the polar grid overlayed 
+unset key
+set grid polar
+set polar
+set rtics format '' scale 0
+#for R we used 6840
+set rtics (1187,2339,3420,4397,5239,5924,6427,6736,6840)
+set rrange[0:r]
+
+plot 4836 with filledcurves x2
+
+plot NaN w l
+
+
+unset multiplot
+EOF
+
+gnuplot tmp2.gnu
+
+#increment by 60 !!!!this needs to be changed if you have a different time step!!!!
+let "num = $num + 60"
+done
+
