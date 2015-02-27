@@ -21,12 +21,12 @@ var9=CTIM_oprod_rate_nprec_3D_GEO
 var10=CTIM_oprod_rate_yprec_3D_GEO
 
 #compile the code if you need
-#gfortran -o ctim_vis_joule.x ctim_vis_joule.f
+gfortran -o ctim_vis_joule.x ctim_vis_joule.f
 
 ####run the ctim_vis.f####
 yes_no=yes
 #get the ioc files you can select just one, or the whole list
-for a in /home/joe/trillian/wenhui_storms/storm_2004_11_07_`printf $yes_no`_precipitation/target/storm_2004_11_07_`printf $yes_no`_precipitation.ioc.046080; do
+for a in storm_2004_11_07_`printf $yes_no`_precipitation.ioc.046080; do
 #for a in /home/joe/trillian/wenhui_storms/storm_2004_11_07_`printf $yes_no`_precipitation/target/storm_2004_11_07_`printf $yes_no`_precipitation.ioc.*; do
 
 #run the program note that this will loop for as many ioc files and you sent it
@@ -56,7 +56,7 @@ for a in /home/joe/trillian/wenhui_storms/storm_2004_11_07_`printf $yes_no`_prec
 
 cat > tmp2.gnu <<EOF
 reset
-set terminal pngcairo enhanced color font "Veranda,22" size 1000,1000
+set terminal pngcairo enhanced color font "Veranda,22" size 1500,1000
 #set output '/home/joe/storage/albuquerque/polar_SM_fix-`printf "%06d" $num`.png'
 set output 'polar_SM_fix-`printf "%06d" $num`.png'
 set multiplot title "Electron Density at 150km Including Precipitation SM"
@@ -70,52 +70,134 @@ set zrange[2000:rz]
 set cbrange[1E8:5E12]
 set cblabel "Electron Precipitation"
 set palette rgb 33,13,10 #rainbow (blue-green-yellow-red)
-#set format cb "%1.1t{/Symbol \327}10^{%S}"
+set colorbox horizontal user origin .1, .15 size .8,.04
+
+set format cb "%1.1t{/Symbol \327}10^{%S}"
 #set format cb "%1.1t10^{%S}"
 set logscale cb
-
-set lmargin at screen .05
-set rmargin at screen .75
-set bmargin at screen .15
-set tmargin at screen .85
 
 unset key
 unset ylabel
 unset ytics
 unset xlabel
-#unset xtics
-#unset ztics
-#unset border
+unset xtics
+unset ztics
+unset border
 
 #north pole
 set view 360,270,1.00
 #south pole
 #set view 0,0,1.0
 
+#do the left plot
+set lmargin at screen .04
+set rmargin at screen .48
+set bmargin at screen .25
+set tmargin at screen .92
+
 #gse
-splot 'alt_slice_k-10yes.txt' using 4:5:6:(\$8) with pm3d
-#geo
-#splot 'alt_slice_k-10yes.txt' using 1:2:3:(\$8) with pm3d
-
-## make cirles to clean the edges of the plot
-
-#set object circle at first 0,0 front size 4836,4836 
-#set style fill solid
-#set object circle at first 0,0 front size 8000,8000 fillstyle rgb "white"
+splot 'alt_slice_k-10yes.txt' using 4:5:6:(\$8) with pm3d 
 
 ## now make the polar grid overlayed 
 unset key
-set grid polar
+set style line 12 lc rgb 'black' lt 0 lw 1.5
+set grid polar ls 12
+set polar
+set angles degrees
+set rtics format '' scale 0
+#for R we used 6840
+set rtics (1187,2339,3420,4397,5239,5924,6427,6736,6840)
+set rrange[0:r]
+unset raxis
+
+r1=4836
+r2=10000
+
+##add labels 
+labnum=5200
+set label "6" at labnum,0 front center
+set label "12" at 0, labnum front center
+set label "18" at -labnum, 0 front center
+set label "24" at 0,-labnum front center
+set label "10" at 1187*cos(30),1187*sin(30) front center font "Veranda,14"
+set label "20" at 2339*cos(30),2339*sin(30) front center font "Veranda,14"
+set label "30" at 3420*cos(30),3420*sin(30) front center font "Veranda,14"
+set label "40" at 4397*cos(30),4397*sin(30) front center font "Veranda,14"
+
+
+#this plot cleans the edges of the cirle
+plot '+' using 1:(r1):(r2) with filledcurves lt rgb "white"
+
+#############do the right plot##############
+unset polar
+
+unset label
+set lmargin at screen .52
+set rmargin at screen .96
+set bmargin at screen .25
+set tmargin at screen .92
+
+#gse
+splot 'alt_slice_k-10yes.txt' using 4:5:6:(\$8) with pm3d 
+
+## now make the polar grid overlayed 
+unset key
+set style line 12 lc rgb 'black' lt 0 lw 1.5
+set grid polar ls 12
 set polar
 set rtics format '' scale 0
 #for R we used 6840
 set rtics (1187,2339,3420,4397,5239,5924,6427,6736,6840)
 set rrange[0:r]
+unset raxis
 
-plot 4836 with filledcurves x2
+r1=4836
+r2=10000
+#plot NaN w l 
 
-plot NaN w l
+###set up the labels
+set label "6" at labnum,0 front center
+set label "12" at 0, labnum front center
+set label "18" at -labnum, 0 front center
+set label "24" at 0,-labnum front center
+set label "10" at 1187*cos(30),1187*sin(30) front center font "Veranda,14"
+set label "20" at 2339*cos(30),2339*sin(30) front center font "Veranda,14"
+set label "30" at 3420*cos(30),3420*sin(30) front center font "Veranda,14"
+set label "40" at 4397*cos(30),4397*sin(30) front center font "Veranda,14"
 
+
+#this plot cleans the edges of the cirle
+plot '+' using 1:(r1):(r2) with filledcurves lt rgb "white"
+
+unset multiplot
+###########creating single plot##################
+set terminal pngcairo enhanced color font "Veranda,22" size 1000,1000
+set output 'polar_single-`printf "%06d" $num`.png'
+set multiplot title "Electron Density at 150km Including Precipitation SM"
+
+unset label 
+unset polar
+set lmargin at screen .17
+set rmargin at screen .83
+set bmargin at screen .25
+set tmargin at screen .92
+
+splot 'alt_slice_k-10yes.txt' using 4:5:6:(\$8) with pm3d 
+
+###set up the labels
+set label "6" at labnum,0 front center
+set label "12" at 0, labnum front center
+set label "18" at -labnum, 0 front center
+set label "24" at 0,-labnum front center
+set label "10" at 1187*cos(30),1187*sin(30) front center font "Veranda,14"
+set label "20" at 2339*cos(30),2339*sin(30) front center font "Veranda,14"
+set label "30" at 3420*cos(30),3420*sin(30) front center font "Veranda,14"
+set label "40" at 4397*cos(30),4397*sin(30) front center font "Veranda,14"
+
+set polar
+set grid
+#this plot cleans the edges of the cirle
+plot '+' using 1:(r1):(r2) with filledcurves lt rgb "white"
 
 unset multiplot
 EOF
