@@ -1,4 +1,6 @@
 #!/bin/bash
+##chickens are cool####
+
 #uses the program iof3d_read_interp_v2.f to read through *ioc* files and graphs
 # the data using gnuplot
 # Joseph B. Jensen july 2014
