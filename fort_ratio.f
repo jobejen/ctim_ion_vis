@@ -1,7 +1,6 @@
       program fort_ratio
       real yes(15,91,10),noo(15,91,10),ratio(15,91,10)
-      real altyes(15,91,16),altnoo(15,91,16),altratio(15,91,16)
-
+      real altyes(21,91,16),altnoo(21,91,16),altratio(21,91,16)
 
       open(unit=101, file="long_slice_000yesboth.txt")
       open(unit=102, file="long_slice_090yesboth.txt")
@@ -46,8 +45,8 @@ c      read(101,*)dummy
       write(111,*)" "
       enddo
 
-      do I=1,56
-      do J=1,15
+      do I=1,91
+      do J=1,21
          read(105,*) altyes(J,I,1),altyes(J,I,2),altyes(J,I,3),
      1altyes(J,I,4),altyes(J,I,5),altyes(J,I,6),altyes(J,I,7),
      2altyes(J,I,8),altyes(J,I,9),altyes(J,I,10),altyes(J,I,11),
@@ -55,8 +54,8 @@ c      read(101,*)dummy
       enddo
       enddo
 
-      do I=1,56
-      do J=1,15
+      do I=1,91
+      do J=1,21
          read(110,*) altnoo(J,I,1),altnoo(J,I,2),altnoo(J,I,3),
      1altnoo(J,I,4),altnoo(J,I,5),altnoo(J,I,6),altnoo(J,I,7),
      2altnoo(J,I,8),altnoo(J,I,9),altnoo(J,I,10),altnoo(J,I,11),
@@ -64,8 +63,8 @@ c      read(101,*)dummy
       enddo
       enddo
 
-      do I=1,56
-      do J=1,15
+      do I=1,91
+      do J=1,21
         write(115,*) altyes(J,I,1),altyes(J,I,2),altyes(J,I,3),
      1altyes(J,I,4),altyes(J,I,5),altyes(J,I,6),
      2altyes(J,I,7)/altnoo(J,I,7),altyes(J,I,8)/altnoo(J,I,8),

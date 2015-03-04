@@ -28,8 +28,8 @@ gfortran -o ctim_vis_joule.x ctim_vis_joule.f
 ####run the ctim_vis.f####
 yes_no=yes
 #get the ioc files you can select just one, or the whole list
-for a in storm_2004_11_07_`printf $yes_no`_precipitation.ioc.046080; do
-#for a in /home/joe/trillian/wenhui_storms/storm_2004_11_07_`printf $yes_no`_precipitation/target/storm_2004_11_07_`printf $yes_no`_precipitation.ioc.*; do
+#for a in storm_2004_11_07_`printf $yes_no`_precipitation.ioc.046080; do
+for a in /home/joe/trillian/wenhui_storms/storm_2004_11_07_`printf $yes_no`_precipitation/target/storm_2004_11_07_`printf $yes_no`_precipitation.ioc.046080; do
 
 #run the program note that this will loop for as many ioc files and you sent it
 ./ctim_vis_joule.x $a $var1 $var2 $var3 $var4 $var5 $var6 $var7 $var8 $var9 $var10 $num $yes_no
@@ -41,26 +41,37 @@ for a in storm_2004_11_07_`printf $yes_no`_precipitation.ioc.046080; do
 #b=/home/joe/trillian/wenhui_storms/storm_2004_11_07_`printf $yes_no`_precipitation/target/storm_2004_11_07_`printf $yes_no`_precipitation.ioc.004680
 
 #### this is for precipitation turned off
-#yes_no=none
-#b=/home/joe/trillian/wenhui_storms/storm_2004_11_07_`printf $yes_no`_precipitation/target/storm_2004_11_07_`printf $yes_no`_precipitation.ioc.046080
+yes_no=none
+b=/home/joe/trillian/wenhui_storms/storm_2004_11_07_`printf $yes_no`_precipitation/target/storm_2004_11_07_`printf $yes_no`_precipitation.ioc.046080
 #for a in /home/joe/trillian/wenhui_storms/storm_2004_11_07_`printf $yes_no`_precipitation/target/storm_2004_11_07_`printf $yes_no`_precipitation.ioc.046080; do
 #for a in /home/joe/trillian/scratch/tsmall/target/*ioc*.*; do
 #for a in /home/joe/trillian/scratch/tsmall/target/*ioc*600; do
 
-#yes_no=noo
+yes_no=noo
 #run the program note that this will loop for as many ioc files and you sent it
-#./ctim_vis_joule.x $b $var1 $var2 $var3 $var4 $var5 $var6 $var7 $var8 $var9 $var10 $num $yes_no
-#make the plots
+./ctim_vis_joule.x $b $var1 $var2 $var3 $var4 $var5 $var6 $var7 $var8 $var9 $var10 $num $yes_no
 
-####graph the data####
+#create ratio files using fort_ratio
+./fort_ratio.x
+
+
+#################################### graph the data #################################
+
 
 #create the gnuplot file to graph !!!make sure you check where the output file goes!!!
 
+
+#the directory to put the ouput files in
+#outdir='/home/joe/storage/albuquerque/'
+outdir=''
+
 cat > tmp2.gnu <<EOF
 reset
+#--------------------------------------------------------------------------------------------
+#---------polar orthonographic 150 km electron density plots particle yes vs no -------------
+#--------------------------------------------------------------------------------------------
 set terminal pngcairo enhanced color font "Veranda,22" size 1500,1000
-#set output '/home/joe/storage/albuquerque/polar_SM_fix-`printf "%06d" $num`.png'
-set output 'polar_SM_fix-`printf "%06d" $num`.png'
+set output "`printf $outdir`polar_alden_150-`printf "%06d" $num`.png"
 set multiplot title "Electron Density at 150km Including Precipitation SM"
 set pm3d depthorder
 set hidden3d
@@ -75,7 +86,6 @@ set palette rgb 33,13,10 #rainbow (blue-green-yellow-red)
 set colorbox horizontal user origin .1, .15 size .8,.04
 
 set format cb "%1.1t{/Symbol \327}10^{%S}"
-#set format cb "%1.1t10^{%S}"
 set logscale cb
 
 unset key
@@ -88,30 +98,26 @@ unset border
 
 #north pole
 set view 360,270,1.00
-#south pole
-#set view 0,0,1.0
 
-#do the left plot
+###left plot###
 set lmargin at screen .04
 set rmargin at screen .48
 set bmargin at screen .25
 set tmargin at screen .92
 
-#gse
 splot 'alt_slice_k-10yes.txt' using 4:5:6:(\$8) with pm3d 
 
-## now make the polar grid overlayed 
+### now make the polar grid overlayed ###
 unset key
 set style line 12 lc rgb 'black' lt 0 lw 1.5
 set grid polar ls 12
 set polar
 set angles degrees
 set rtics format '' scale 0
-#for R we used 6840
+#used R = 6480
 set rtics (1187,2339,3420,4397,5239,5924,6427,6736,6840)
 set rrange[0:r]
 unset raxis
-
 r1=4836
 r2=10000
 
@@ -127,22 +133,20 @@ set label "30" at 3420*cos(30),3420*sin(30) front center font "Veranda,14"
 set label "40" at 4397*cos(30),4397*sin(30) front center font "Veranda,14"
 
 
-#this plot cleans the edges of the cirle
+#this plot cleans the edges of the cirle and plots the grid liens
 plot '+' using 1:(r1):(r2) with filledcurves lt rgb "white"
 
 #############do the right plot##############
 unset polar
-
 unset label
 set lmargin at screen .52
 set rmargin at screen .96
 set bmargin at screen .25
 set tmargin at screen .92
 
-#gse
-splot 'alt_slice_k-10yes.txt' using 4:5:6:(\$8) with pm3d 
+splot 'alt_slice_k-10noo.txt' using 4:5:6:(\$8) with pm3d 
 
-## now make the polar grid overlayed 
+### now make the polar grid overlayed ###
 unset key
 set style line 12 lc rgb 'black' lt 0 lw 1.5
 set grid polar ls 12
@@ -172,19 +176,23 @@ set label "40" at 4397*cos(30),4397*sin(30) front center font "Veranda,14"
 plot '+' using 1:(r1):(r2) with filledcurves lt rgb "white"
 
 unset multiplot
-###########creating single plot##################
+
+###########creating ratio of electron densities##################
+
 set terminal pngcairo enhanced color font "Veranda,22" size 1000,1000
-set output 'polar_single-`printf "%06d" $num`.png'
+set output '`printf $outdir`polar_single-`printf "%06d" $num`.png'
 set multiplot title "Electron Density at 150km Including Precipitation SM"
 
 unset label 
 unset polar
+
+set cbrange [1:100]
 set lmargin at screen .17
 set rmargin at screen .83
 set bmargin at screen .25
 set tmargin at screen .92
 
-splot 'alt_slice_k-10yes.txt' using 4:5:6:(\$8) with pm3d 
+splot 'alt_slice_k-10rat.txt' using 4:5:6:(\$8) with pm3d 
 
 ###set up the labels
 set label "6" at labnum,0 front center

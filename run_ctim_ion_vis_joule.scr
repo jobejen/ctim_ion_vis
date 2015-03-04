@@ -26,7 +26,7 @@ gfortran -o ctim_vis_joule.x ctim_vis_joule.f
 ####run the ctim_vis.f####
 yes_no=yes
 #get the ioc files you can select just one, or the whole list
-for a in /home/joe/trillian/wenhui_storms/storm_2004_11_07_`printf $yes_no`_precipitation/target/storm_2004_11_07_`printf $yes_no`_precipitation.ioc.046080; do
+for a in /home/joe/trillian/wenhui_storms/storm_2004_11_07_`printf $yes_no`_precipitation/target/storm_2004_11_07_`printf $yes_no`_precipitation.ioc.046080 ; do
 #for a in /home/joe/graphs/storm_2004_11_07_yes_precipitation.ioc.050400; do
 #for a in /home/joe/trillian/scratch/tsmall/target/*ioc*.*; do
 #for a in /home/joe/trillian/scratch/tsmall/target/*ioc*600; do
@@ -51,136 +51,555 @@ yes_no=noo
 #run the program note that this will loop for as many ioc files and you sent it
 ./ctim_vis_joule.x $b $var1 $var2 $var3 $var4 $var5 $var6 $var7 $var8 $var9 $var10 $num $yes_no
 #make the plots
-
+gfortran -o fort_ratio.x fort_ratio.f
+./fort_ratio.x
 ####graph the data####
 
 #create the gnuplot file to graph !!!make sure you check where the output file goes!!!
 
+#the directory to put the output files in
+#outdir='/home/joe/storage/albuquerque/'
+outdir=''
+
 cat > tmp1.gnu <<EOF
-#set terminal postscript enhanced color "Times-Roman" 22 size 15,15
-#set output '/home/joe/graphs/movies/alts-`printf "%06d" $num`.ps'
-set terminal pngcairo enhanced color font "Veranda,22" size 1000,1000
-set output '/home/joe/storage/albuquerque/alts_aldeny-`printf "%06d" $num`.png'
 reset
-set multiplot title "Electron Density at 115km Including Precipitation"
-#set xrange [0:75]
-set xlabel "Xgse"
-set ylabel "Ygse"
-#set pm3d depthorder
-set pm3d 
-set hidden3d 
-r = 8000.                                                                          
-rz= 9000.                                                                             
-set xrange[-r:r]                                                                          
-set yrange[-r:r]                                                                             
-set zrange[-rz:rz]
-set key outside
-set palette rgb 33,13,10 #rainbow (blue-green-yellow-red)
-set format cb "%1.1t{/Symbol \327}10^{%S}"
-#set format cb "%1.1t10^{%S}"
-set logscale cb
-#set cbrange[1E5:1E10]
-
-set lmargin at screen .1
-set rmargin at screen .80
-set bmargin at screen .15
-set tmargin at screen .85
-
-
-unset ztics
-unset ytics
-set colorbox vertical user origin .81, .2 size .03,.6
-set cblabel "stuff in (units)"
-#set cbrange[1E10:5E12] #alden
+#--------------------------------------------------------------------------------------------
+#---------polar orthonographic 150 km electron density plots particle yes vs no -------------
+#--------------------------------------------------------------------------------------------
+set terminal pngcairo enhanced color font "Veranda,22" size 1500,1000
+set output "`printf $outdir`polar_alden_150-`printf "%06d" $num`.png"
+set multiplot title "Electron Density at 150km Including Precipitation SM"
+set pm3d depthorder
+set hidden3d
+r = 5700.
+rz= 8000.
+set xrange[-r:r]
+set yrange[-r:r]
+set zrange[2000:rz]
 set cbrange[1E8:5E12]
-set view 0,0,2.00
+set cblabel "Electron Precipitation"
+set palette rgb 33,13,10 #rainbow (blue-green-yellow-red)
+set colorbox horizontal user origin .1, .15 size .8,.04
+
+set format cb "%1.1t{/Symbol \327}10^{%S}"
+set logscale cb
+
 unset key
 unset ylabel
+unset ytics
 unset xlabel
-unset border
 unset xtics
+unset ztics
+unset border
 
-fac=2.
+#north pole
+set view 360,270,1.00
 
-#splot 'alt_slice_k-10yes.txt' using 5:((\$4)*(-1)):(\$11) with pm3d
-#splot 'alt_slice_k-10yes.txt' using 5:((\$4)*(-1)):6:(\$11) with pm3d 
+###left plot###
+set lmargin at screen .04
+set rmargin at screen .48
+set bmargin at screen .25
+set tmargin at screen .92
+
 splot 'alt_slice_k-10yes.txt' using 4:5:6:(\$8) with pm3d 
 
-splot "lines_0.dat" using 1:2:3:4  with points lt 6 lc rgb "black" ps 10.00*fac,"" using 1:2:3:4  with points lt 6 lc rgb "black" ps 20.0*fac, "" using 1:2:3:4  with points lt 6 lc rgb "black" ps 30.0*fac, "" using 1:2:3:4  with points lt 6 lc rgb "black" ps 40.0*fac
+### now make the polar grid overlayed ###
+unset key
+set style line 12 lc rgb 'black' lt 0 lw 1.5
+set grid polar ls 12
+set polar
+set angles degrees
+set rtics format '' scale 0
+#used R = 6480
+set rtics (1187,2339,3420,4397,5239,5924,6427,6736,6840)
+set rrange[0:r]
+unset raxis
+r1=4836
+r2=10000
 
-unset multiplot
-set output '/home/joe/trillian/scratch/laptop/ctim_ion_vis/movies/alts_aldeno-`printf "%06d" $num`.png'
-set multiplot title "electron density No precipitation"
-set lmargin at screen .1
-set rmargin at screen .80
-set bmargin at screen .15
-set tmargin at screen .85
+##add labels 
+labnum=5200
+set label "6" at labnum,0 front center
+set label "12" at 0, labnum front center
+set label "18" at -labnum, 0 front center
+set label "24" at 0,-labnum front center
+set label "10" at 1187*cos(30),1187*sin(30) front center font "Veranda,14"
+set label "20" at 2339*cos(30),2339*sin(30) front center font "Veranda,14"
+set label "30" at 3420*cos(30),3420*sin(30) front center font "Veranda,14"
+set label "40" at 4397*cos(30),4397*sin(30) front center font "Veranda,14"
 
+
+#this plot cleans the edges of the cirle and plots the grid liens
+plot '+' using 1:(r1):(r2) with filledcurves lt rgb "white"
+
+#############do the right plot##############
+unset polar
+unset label
+set lmargin at screen .52
+set rmargin at screen .96
+set bmargin at screen .25
+set tmargin at screen .92
 
 splot 'alt_slice_k-10noo.txt' using 4:5:6:(\$8) with pm3d 
 
-splot "lines_0.dat" using 1:2:3:4  with points lt 6 lc rgb "black" ps 10.00*fac,"" using 1:2:3:4  with points lt 6 lc rgb "black" ps 20.0*fac, "" using 1:2:3:4  with points lt 6 lc rgb "black" ps 30.0*fac, "" using 1:2:3:4  with points lt 6 lc rgb "black" ps 40.0*fac
+### now make the polar grid overlayed ###
+unset key
+set style line 12 lc rgb 'black' lt 0 lw 1.5
+set grid polar ls 12
+set polar
+set rtics format '' scale 0
+#for R we used 6840
+set rtics (1187,2339,3420,4397,5239,5924,6427,6736,6840)
+set rrange[0:r]
+unset raxis
 
+r1=4836
+r2=10000
+#plot NaN w l 
+
+###set up the labels
+set label "6" at labnum,0 front center
+set label "12" at 0, labnum front center
+set label "18" at -labnum, 0 front center
+set label "24" at 0,-labnum front center
+set label "10" at 1187*cos(30),1187*sin(30) front center font "Veranda,14"
+set label "20" at 2339*cos(30),2339*sin(30) front center font "Veranda,14"
+set label "30" at 3420*cos(30),3420*sin(30) front center font "Veranda,14"
+set label "40" at 4397*cos(30),4397*sin(30) front center font "Veranda,14"
+
+
+#this plot cleans the edges of the cirle
+plot '+' using 1:(r1):(r2) with filledcurves lt rgb "white"
 
 unset multiplot
-######conductivity#######
-set output '/home/joe/trillian/scratch/laptop/ctim_ion_vis/movies/altscondpy-`printf "%06d" $num`.png'
-unset ylabel
 
-set cbrange[1E-2:1E-7]
+###########creating ratio of electron densities##################
+
+set terminal pngcairo enhanced color font "Veranda,22" size 1000,1000
+set output '`printf $outdir`polar_single-`printf "%06d" $num`.png'
+set multiplot title "Electron Density at 150km Including Precipitation SM"
+
+unset label 
+unset polar
+
+set cbrange [1:500]
+set lmargin at screen .17
+set rmargin at screen .83
+set bmargin at screen .25
+set tmargin at screen .92
+
+splot 'alt_slice_k-10rat.txt' using 4:5:6:(\$8) with pm3d 
+
+###set up the labels
+set label "6" at labnum,0 front center
+set label "12" at 0, labnum front center
+set label "18" at -labnum, 0 front center
+set label "24" at 0,-labnum front center
+set label "10" at 1187*cos(30),1187*sin(30) front center font "Veranda,14"
+set label "20" at 2339*cos(30),2339*sin(30) front center font "Veranda,14"
+set label "30" at 3420*cos(30),3420*sin(30) front center font "Veranda,14"
+set label "40" at 4397*cos(30),4397*sin(30) front center font "Veranda,14"
+
+set polar
+set grid
+#this plot cleans the edges of the cirle
+plot '+' using 1:(r1):(r2) with filledcurves lt rgb "white"
+
+unset multiplot
+
+######################### Pederson conductivity polar plots ######################
+set terminal pngcairo enhanced color font "Veranda,22" size 1500,1000
+set output '`printf $outdir`polar_ped-cond-`printf "%06d" $num`.png'
+set multiplot title "Pederson Conductivities 150km"
+
+unset label 
+unset polar
+
+###left plot###
+set lmargin at screen .04
+set rmargin at screen .48
+set bmargin at screen .25
+set tmargin at screen .92
+
+set cbrange[1E-3:1E-7]
 splot 'alt_slice_k-10yes.txt' using 4:5:6:(\$10) with pm3d 
 
-set output '/home/joe/trillian/scratch/laptop/ctim_ion_vis/movies/altscondpn-`printf "%06d" $num`.png'
+###set up the labels#####
+set label "6" at labnum,0 front center
+set label "12" at 0, labnum front center
+set label "18" at -labnum, 0 front center
+set label "24" at 0,-labnum front center
+set label "10" at 1187*cos(30),1187*sin(30) front center font "Veranda,14"
+set label "20" at 2339*cos(30),2339*sin(30) front center font "Veranda,14"
+set label "30" at 3420*cos(30),3420*sin(30) front center font "Veranda,14"
+set label "40" at 4397*cos(30),4397*sin(30) front center font "Veranda,14"
+
+set polar
+set grid
+#this plot cleans the edges of the cirle
+plot '+' using 1:(r1):(r2) with filledcurves lt rgb "white"
+
+
+#############do the right plot##############
+unset polar
+unset label
+set lmargin at screen .52
+set rmargin at screen .96
+set bmargin at screen .25
+set tmargin at screen .92
+
+
+###set up the labels#####
+set label "6" at labnum,0 front center
+set label "12" at 0, labnum front center
+set label "18" at -labnum, 0 front center
+set label "24" at 0,-labnum front center
+set label "10" at 1187*cos(30),1187*sin(30) front center font "Veranda,14"
+set label "20" at 2339*cos(30),2339*sin(30) front center font "Veranda,14"
+set label "30" at 3420*cos(30),3420*sin(30) front center font "Veranda,14"
+set label "40" at 4397*cos(30),4397*sin(30) front center font "Veranda,14"
+
 splot 'alt_slice_k-10noo.txt' using 4:5:6:(\$10) with pm3d 
 
-set output '/home/joe/trillian/scratch/laptop/ctim_ion_vis/movies/altscondhn-`printf "%06d" $num`.png'
-splot 'alt_slice_k-10noo.txt' using 4:5:6:(\$9) with pm3d 
-
-set output '/home/joe/trillian/scratch/laptop/ctim_ion_vis/movies/altscondhy-`printf "%06d" $num`.png'
-splot 'alt_slice_k-10yes.txt' using 4:5:6:(\$9) with pm3d 
-
-splot "lines_0.dat" using 1:2:3:4  with points lt 6 lc rgb "black" ps 10.00*fac,"" using 1:2:3:4  with points lt 6 lc rgb "black" ps 20.0*fac, "" using 1:2:3:4  with points lt 6 lc rgb "black" ps 30.0*fac, "" using 1:2:3:4  with points lt 6 lc rgb "black" ps 40.0*fac
-
-#splot 'alt_slice_k-10yes.txt' using 4:5:6:(\$8) with pm3d title "alden"
-
-#splot 'alt_slice_k-10noo.txt' using 1:2:3:(\$8) with pm3d title "alden"
-
-set cbrange [.01:10]
-set logscale cb
-#splot 'alt_slice_k-10rat.txt' using 1:2:3:(\$8) with pm3d title "alden"
-
-
-
-set cbrange[1E-7:1E-11]
-set view 0,0,1.75
-#splot 'alt_slice_k-10yes.txt' using 1:2:3:(\$9) with pm3d title "hallc"
-#splot 'alt_slice_k-10noo.txt' using 1:2:3:(\$9) with pm3d title "hallc"
-
-set cbrange[1E-4:1E-7]
-set view 0,0,1.75
-#splot 'alt_slice_k-10yes.txt' using 1:2:3:(\$10) with pm3d title "pedc"
-#splot 'alt_slice_k-10noo.txt' using 1:2:3:(\$10) with pm3d title "pedc"
-
-set cbrange [.01:10]             
-set logscale cb
-#splot 'alt_slice_k-10rat.txt' using 1:2:3:(\$10) with pm3d title "pedc"
+set polar
+set grid
+#this plot cleans the edges of the cirle
+plot '+' using 1:(r1):(r2) with filledcurves lt rgb "white"
 
 unset multiplot
-######Joule#######
-set output '/home/joe/trillian/scratch/laptop/ctim_ion_vis/movies/altjouley-`printf "%06d" $num`.png'
+
+
+###########creating ratio of pederson conductivites##################
+
+set terminal pngcairo enhanced color font "Veranda,22" size 1000,1000
+set output '`printf $outdir`Ped-cond_rat-`printf "%06d" $num`.png'
+set multiplot title "Pederson conductivites ratio"
+
+unset label 
+unset polar
+
+set cbrange [1:100]
+set lmargin at screen .17
+set rmargin at screen .83
+set bmargin at screen .25
+set tmargin at screen .92
+
+splot 'alt_slice_k-10rat.txt' using 4:5:6:(\$10) with pm3d 
+
+###set up the labels
+set label "6" at labnum,0 front center
+set label "12" at 0, labnum front center
+set label "18" at -labnum, 0 front center
+set label "24" at 0,-labnum front center
+set label "10" at 1187*cos(30),1187*sin(30) front center font "Veranda,14"
+set label "20" at 2339*cos(30),2339*sin(30) front center font "Veranda,14"
+set label "30" at 3420*cos(30),3420*sin(30) front center font "Veranda,14"
+set label "40" at 4397*cos(30),4397*sin(30) front center font "Veranda,14"
+
+set polar
+set grid
+#this plot cleans the edges of the cirle
+plot '+' using 1:(r1):(r2) with filledcurves lt rgb "white"
+
+unset multiplot
+
+######################### Hall conductivity polar plots ######################
+set terminal pngcairo enhanced color font "Veranda,22" size 1500,1000
+set output '`printf $outdir`polar_hall-cond-`printf "%06d" $num`.png'
+set multiplot title "Hall Conductivities 150km"
+
+unset label 
+unset polar
+
+###left plot###
+set lmargin at screen .04
+set rmargin at screen .48
+set bmargin at screen .25
+set tmargin at screen .92
+
+set cbrange[1E-3:1E-7]
+splot 'alt_slice_k-10yes.txt' using 4:5:6:(\$9) with pm3d 
+
+###set up the labels#####
+set label "6" at labnum,0 front center
+set label "12" at 0, labnum front center
+set label "18" at -labnum, 0 front center
+set label "24" at 0,-labnum front center
+set label "10" at 1187*cos(30),1187*sin(30) front center font "Veranda,14"
+set label "20" at 2339*cos(30),2339*sin(30) front center font "Veranda,14"
+set label "30" at 3420*cos(30),3420*sin(30) front center font "Veranda,14"
+set label "40" at 4397*cos(30),4397*sin(30) front center font "Veranda,14"
+
+set polar
+set grid
+#this plot cleans the edges of the cirle
+plot '+' using 1:(r1):(r2) with filledcurves lt rgb "white"
+
+
+#############do the right plot##############
+unset polar
+unset label
+set lmargin at screen .52
+set rmargin at screen .96
+set bmargin at screen .25
+set tmargin at screen .92
+
+splot 'alt_slice_k-10noo.txt' using 4:5:6:(\$9) with pm3d 
+
+set polar
+set grid
+###set up the labels#####
+set label "6" at labnum,0 front center
+set label "12" at 0, labnum front center
+set label "18" at -labnum, 0 front center
+set label "24" at 0,-labnum front center
+set label "10" at 1187*cos(30),1187*sin(30) front center font "Veranda,14"
+set label "20" at 2339*cos(30),2339*sin(30) front center font "Veranda,14"
+set label "30" at 3420*cos(30),3420*sin(30) front center font "Veranda,14"
+set label "40" at 4397*cos(30),4397*sin(30) front center font "Veranda,14"
+
+#this plot cleans the edges of the cirle
+plot '+' using 1:(r1):(r2) with filledcurves lt rgb "white"
+
+unset multiplot
+
+###########creating ratio of Hall conductivities##################
+
+set terminal pngcairo enhanced color font "Veranda,22" size 1000,1000
+set output '`printf $outdir`hall-cond_rat-`printf "%06d" $num`.png'
+set multiplot title "ratio of Hall Conductivities"
+
+unset label 
+unset polar
+
+set cbrange [1:500]
+set lmargin at screen .17
+set rmargin at screen .83
+set bmargin at screen .25
+set tmargin at screen .92
+
+splot 'alt_slice_k-10rat.txt' using 4:5:6:(\$9) with pm3d 
+
+###set up the labels
+set label "6" at labnum,0 front center
+set label "12" at 0, labnum front center
+set label "18" at -labnum, 0 front center
+set label "24" at 0,-labnum front center
+set label "10" at 1187*cos(30),1187*sin(30) front center font "Veranda,14"
+set label "20" at 2339*cos(30),2339*sin(30) front center font "Veranda,14"
+set label "30" at 3420*cos(30),3420*sin(30) front center font "Veranda,14"
+set label "40" at 4397*cos(30),4397*sin(30) front center font "Veranda,14"
+
+set polar
+set grid
+#this plot cleans the edges of the cirle
+plot '+' using 1:(r1):(r2) with filledcurves lt rgb "white"
+
+unset multiplot
+
+#
+############################## Joule heating polar ##############################
+#
+set terminal pngcairo enhanced color font "Veranda,22" size 1500,1000
+set output '`printf $outdir`polar_joule-`printf "%06d" $num`.png'
+set multiplot title "Joule Heating 150km"
+
+unset polar 
+unset label
+
+###left plot###
+set lmargin at screen .04
+set rmargin at screen .48
+set bmargin at screen .25
+set tmargin at screen .92
 
 set cbrange[1E-7:1E-12]
-set view 0,0,1.75
+
 splot 'alt_slice_k-10yes.txt' using 1:2:3:(\$11) with pm3d title "joule"
 
-set output '/home/joe/trillian/scratch/laptop/ctim_ion_vis/movies/altjoulen-`printf "%06d" $num`.png'
+###set up the labels#####
+set label "6" at labnum,0 front center
+set label "12" at 0, labnum front center
+set label "18" at -labnum, 0 front center
+set label "24" at 0,-labnum front center
+set label "10" at 1187*cos(30),1187*sin(30) front center font "Veranda,14"
+set label "20" at 2339*cos(30),2339*sin(30) front center font "Veranda,14"
+set label "30" at 3420*cos(30),3420*sin(30) front center font "Veranda,14"
+set label "40" at 4397*cos(30),4397*sin(30) front center font "Veranda,14"
+
+set polar
+set grid
+#this plot cleans the edges of the cirle
+plot '+' using 1:(r1):(r2) with filledcurves lt rgb "white"
+
+unset polar 
+unset label
+
+#################right plot#################
+set lmargin at screen .52
+set rmargin at screen .96
+set bmargin at screen .25
+set tmargin at screen .92
+
+set cbrange[1E-7:1E-12]
 
 splot 'alt_slice_k-10noo.txt' using 1:2:3:(\$11) with pm3d title "joule"
 
-#set output '/home/joe/trillian/scratch/laptop/ctim_ion_vis/movies/altjouler-`printf "%06d" $num`.png'
-#set cbrange [.1:10]
-set logscale cb
-#splot 'alt_slice_k-10rat.txt' using 1:2:3:(\$11) with pm3d title "joule"
+###set up the labels#####
+set label "6" at labnum,0 front center
+set label "12" at 0, labnum front center
+set label "18" at -labnum, 0 front center
+set label "24" at 0,-labnum front center
+set label "10" at 1187*cos(30),1187*sin(30) front center font "Veranda,14"
+set label "20" at 2339*cos(30),2339*sin(30) front center font "Veranda,14"
+set label "30" at 3420*cos(30),3420*sin(30) front center font "Veranda,14"
+set label "40" at 4397*cos(30),4397*sin(30) front center font "Veranda,14"
+
+set polar
+set grid
+#this plot cleans the edges of the cirle
+plot '+' using 1:(r1):(r2) with filledcurves lt rgb "white"
+
+unset multiplot
+
+#################### joule heating ratio plot ############################
+
+set terminal pngcairo enhanced color font "Veranda,22" size 1000,1000
+set output '`printf $outdir`joule_rat-`printf "%06d" $num`.png'
+set multiplot title "ratio of Joule heating at 150km"
+
+unset label 
+unset polar
+
+set cbrange [1:100]
+set lmargin at screen .17
+set rmargin at screen .83
+set bmargin at screen .25
+set tmargin at screen .92
+
+splot 'alt_slice_k-10rat.txt' using 4:5:6:(\$11) with pm3d 
+
+###set up the labels
+set label "6" at labnum,0 front center
+set label "12" at 0, labnum front center
+set label "18" at -labnum, 0 front center
+set label "24" at 0,-labnum front center
+set label "10" at 1187*cos(30),1187*sin(30) front center font "Veranda,14"
+set label "20" at 2339*cos(30),2339*sin(30) front center font "Veranda,14"
+set label "30" at 3420*cos(30),3420*sin(30) front center font "Veranda,14"
+set label "40" at 4397*cos(30),4397*sin(30) front center font "Veranda,14"
+
+set polar
+set grid
+#this plot cleans the edges of the cirle
+plot '+' using 1:(r1):(r2) with filledcurves lt rgb "white"
+
+unset multiplot
+
+
+#
+############################## currents J_x polar ##############################
+#
+set terminal pngcairo enhanced color font "Veranda,22" size 1500,1000
+set output '`printf $outdir`polar_currents-Jx-`printf "%06d" $num`.png'
+set multiplot title "J_x current density 150km"
+
+unset polar 
+unset label
+
+###left plot###
+set lmargin at screen .04
+set rmargin at screen .48
+set bmargin at screen .25
+set tmargin at screen .92
+
+set palette rgb 33,13,10 #rainbow (blue-green-white-yellow-red)
+unset log cb
+set cbrange[-1E-6:1E-6]
+
+splot 'alt_slice_k-10yes.txt' using 1:2:3:(\$12) with pm3d title "J_x"
+
+###set up the labels#####
+set label "6" at labnum,0 front center
+set label "12" at 0, labnum front center
+set label "18" at -labnum, 0 front center
+set label "24" at 0,-labnum front center
+set label "10" at 1187*cos(30),1187*sin(30) front center font "Veranda,14"
+set label "20" at 2339*cos(30),2339*sin(30) front center font "Veranda,14"
+set label "30" at 3420*cos(30),3420*sin(30) front center font "Veranda,14"
+set label "40" at 4397*cos(30),4397*sin(30) front center font "Veranda,14"
+
+set polar
+set grid
+#this plot cleans the edges of the cirle
+plot '+' using 1:(r1):(r2) with filledcurves lt rgb "white"
+
+unset polar 
+unset label
+
+#################right plot#################
+set lmargin at screen .52
+set rmargin at screen .96
+set bmargin at screen .25
+set tmargin at screen .92
+
+
+splot 'alt_slice_k-10noo.txt' using 1:2:3:(\$12) with pm3d title "J_x"
+
+###set up the labels#####
+set label "6" at labnum,0 front center
+set label "12" at 0, labnum front center
+set label "18" at -labnum, 0 front center
+set label "24" at 0,-labnum front center
+set label "10" at 1187*cos(30),1187*sin(30) front center font "Veranda,14"
+set label "20" at 2339*cos(30),2339*sin(30) front center font "Veranda,14"
+set label "30" at 3420*cos(30),3420*sin(30) front center font "Veranda,14"
+set label "40" at 4397*cos(30),4397*sin(30) front center font "Veranda,14"
+
+set polar
+set grid
+#this plot cleans the edges of the cirle
+plot '+' using 1:(r1):(r2) with filledcurves lt rgb "white"
+
+unset multiplot
+
+#################### J_x currents ratio plot ############################
+
+set terminal pngcairo enhanced color font "Veranda,22" size 1000,1000
+set output '`printf $outdir`currents-J_x-rat-`printf "%06d" $num`.png'
+set multiplot title "ratio of J_x currents at 150km"
+
+unset label 
+unset polar
+
+set cbrange [1:100]
+set lmargin at screen .17
+set rmargin at screen .83
+set bmargin at screen .25
+set tmargin at screen .92
+
+splot 'alt_slice_k-10rat.txt' using 4:5:6:(\$12) with pm3d 
+
+###set up the labels
+set label "6" at labnum,0 front center
+set label "12" at 0, labnum front center
+set label "18" at -labnum, 0 front center
+set label "24" at 0,-labnum front center
+set label "10" at 1187*cos(30),1187*sin(30) front center font "Veranda,14"
+set label "20" at 2339*cos(30),2339*sin(30) front center font "Veranda,14"
+set label "30" at 3420*cos(30),3420*sin(30) front center font "Veranda,14"
+set label "40" at 4397*cos(30),4397*sin(30) front center font "Veranda,14"
+
+set polar
+set grid
+#this plot cleans the edges of the cirle
+plot '+' using 1:(r1):(r2) with filledcurves lt rgb "white"
+
+unset multiplot
+
+
+
+set output "chicken.png"
 
 set cbrange [.01:10]                                                                                                                                                                                         
 set logscale cb
@@ -196,10 +615,10 @@ unset logscale cb
 set cbrange[5E-6:5E-9]
 #set cbrange[-5E-6:-5E-9]
 set view 0,0,1.75
-splot 'alt_slice_k-10yes.txt' using 1:2:3:(\$12) with pm3d  title "jdenx"
+#splot 'alt_slice_k-10yes.txt' using 1:2:3:(\$12) with pm3d  title "jdenx"
 #splot 'alt_slice_k-10noo.txt' using 1:2:3:(\$12) with pm3d  title "jdenx"
 
-splot "lines_0.dat" using 1:2:3:4  with points lt 6 lc rgb "black" ps 10.00*fac,"" using 1:2:3:4  with points lt 6 lc rgb "black" ps 20.0*fac, "" using 1:2:3:4  with points lt 6 lc rgb "black" ps 30.0*fac, "" using 1:2:3:4  with points lt 6 lc rgb "black" ps 40.0*fac
+
 
 set cbrange[.01:10]
 set cbrange[-1E-06:1E-6]
