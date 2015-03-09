@@ -82,6 +82,7 @@ set palette rgb 33,13,10 #rainbow (blue-green-yellow-red)
 set colorbox horizontal user origin .1, .15 size .8,.04
 
 set format cb "%1.1t{/Symbol \327}10^{%S}"
+set format cb "10^{%L}"
 set logscale cb
 
 unset key
@@ -513,7 +514,7 @@ set rmargin at screen .48
 set bmargin at screen .25
 set tmargin at screen .92
 
-set palette rgb 33,13,10 #rainbow (blue-green-white-yellow-red)
+set palette defined (-1E-6 "blue", 0 "white", 1E-6 "red")
 unset log cb
 set cbrange[-1E-6:1E-6]
 
@@ -571,12 +572,13 @@ set multiplot title "ratio of J_x currents at 150km"
 
 unset label 
 unset polar
-
+set log cb
 set cbrange [1:100]
 set lmargin at screen .17
 set rmargin at screen .83
 set bmargin at screen .25
 set tmargin at screen .92
+set palette rgb 33,13,10 #rainbow (blue-green-white-yellow-red)
 
 splot 'alt_slice_k-10rat.txt' using 4:5:6:(\$12) with pm3d 
 
@@ -597,37 +599,108 @@ plot '+' using 1:(r1):(r2) with filledcurves lt rgb "white"
 
 unset multiplot
 
+#
+############################## currents J_y polar ##############################
+#
+set terminal pngcairo enhanced color font "Veranda,22" size 1500,1000
+set output '`printf $outdir`polar_currents-Jy-`printf "%06d" $num`.png'
+set multiplot title "J_y current density 150km"
+
+unset polar 
+unset label
+
+###left plot###
+set lmargin at screen .04
+set rmargin at screen .48
+set bmargin at screen .25
+set tmargin at screen .92
+
+set palette defined (-1E-6 "blue", 0 "white", 1E-6 "red")
+#set palette rgb 33,13,10 #rainbow (blue-green-white-yellow-red)
+unset log cb
+set cbrange[-1E-6:1E-6]
+
+splot 'alt_slice_k-10yes.txt' using 1:2:3:(\$13) with pm3d title "J_y"
+
+###set up the labels#####
+set label "6" at labnum,0 front center
+set label "12" at 0, labnum front center
+set label "18" at -labnum, 0 front center
+set label "24" at 0,-labnum front center
+set label "10" at 1187*cos(30),1187*sin(30) front center font "Veranda,14"
+set label "20" at 2339*cos(30),2339*sin(30) front center font "Veranda,14"
+set label "30" at 3420*cos(30),3420*sin(30) front center font "Veranda,14"
+set label "40" at 4397*cos(30),4397*sin(30) front center font "Veranda,14"
+
+set polar
+set grid
+#this plot cleans the edges of the cirle
+plot '+' using 1:(r1):(r2) with filledcurves lt rgb "white"
+
+unset polar 
+unset label
+
+#################right plot#################
+set lmargin at screen .52
+set rmargin at screen .96
+set bmargin at screen .25
+set tmargin at screen .92
 
 
-set output "chicken.png"
+splot 'alt_slice_k-10noo.txt' using 1:2:3:(\$13) with pm3d title "J_y"
 
-set cbrange [.01:10]                                                                                                                                                                                         
-set logscale cb
-#splot 'alt_slice_k-10rat.txt' using 1:2:3:(\$11) with pm3d title "joule"
+###set up the labels#####
+set label "6" at labnum,0 front center
+set label "12" at 0, labnum front center
+set label "18" at -labnum, 0 front center
+set label "24" at 0,-labnum front center
+set label "10" at 1187*cos(30),1187*sin(30) front center font "Veranda,14"
+set label "20" at 2339*cos(30),2339*sin(30) front center font "Veranda,14"
+set label "30" at 3420*cos(30),3420*sin(30) front center font "Veranda,14"
+set label "40" at 4397*cos(30),4397*sin(30) front center font "Veranda,14"
+
+set polar
+set grid
+#this plot cleans the edges of the cirle
+plot '+' using 1:(r1):(r2) with filledcurves lt rgb "white"
 
 unset multiplot
-######conductivity#######
-set output '/home/joe/trillian/scratch/laptop/ctim_ion_vis/movies/altsjden-`printf "%06d" $num`.png'
-set multiplot 
 
-unset logscale cb
-#set cbrange[1E-04:1E-8]
-set cbrange[5E-6:5E-9]
-#set cbrange[-5E-6:-5E-9]
-set view 0,0,1.75
-#splot 'alt_slice_k-10yes.txt' using 1:2:3:(\$12) with pm3d  title "jdenx"
-#splot 'alt_slice_k-10noo.txt' using 1:2:3:(\$12) with pm3d  title "jdenx"
+#################### J_y currents ratio plot ############################
 
+set terminal pngcairo enhanced color font "Veranda,22" size 1000,1000
+set output '`printf $outdir`currents-J_y-rat-`printf "%06d" $num`.png'
+set multiplot title "ratio of J_y currents at 150km"
 
+unset label 
+unset polar
 
-set cbrange[.01:10]
-set cbrange[-1E-06:1E-6]
-#splot 'alt_slice_k-10rat.txt' using 4:5:6:(\$12) with pm3d  title "jdenx"
-#splot 'alt_slice_k-10rat.txt' using 1:2:3:(\$12) with pm3d  title "jdenx"
+set cbrange [1:100]
+set lmargin at screen .17
+set rmargin at screen .83
+set bmargin at screen .25
+set tmargin at screen .92
+set logscale cb
+set palette rgb 33,13,10 #rainbow (blue-green-white-yellow-red)
 
-set cbrange[1E-6:1E-12]
-set view 0,0,1.75
-#splot 'alt_slice_k-10.txt' using 1:2:3:(\$13) with pm3d title "jdeny" 
+splot 'alt_slice_k-10rat.txt' using 4:5:6:(\$13) with pm3d 
+
+###set up the labels
+set label "6" at labnum,0 front center
+set label "12" at 0, labnum front center
+set label "18" at -labnum, 0 front center
+set label "24" at 0,-labnum front center
+set label "10" at 1187*cos(30),1187*sin(30) front center font "Veranda,14"
+set label "20" at 2339*cos(30),2339*sin(30) front center font "Veranda,14"
+set label "30" at 3420*cos(30),3420*sin(30) front center font "Veranda,14"
+set label "40" at 4397*cos(30),4397*sin(30) front center font "Veranda,14"
+
+set polar
+set grid
+#this plot cleans the edges of the cirle
+plot '+' using 1:(r1):(r2) with filledcurves lt rgb "white"
+
+unset multiplot
 
 EOF
 
@@ -642,10 +715,9 @@ cat -s long_slice_000yesrev.txt long_slice_000_negyes.txt >> long_slice_000yesbo
 cat -s long_slice_000noorev.txt long_slice_000_negnoo.txt >> long_slice_000nooboth.txt
 cat > tmp2.gnu <<EOF
 reset 
-#set terminal postscript enhanced color "Times-Roman" 22 size 15,10
-#set output '/home/joe/trillian/scratch/laptop/ctim_ion_vis/movies/longs-`printf "%06d" $num`.ps'
+########################### longitudinal slice electron density ######################
 set terminal pngcairo enhanced color font "Veranda,22" size 1500,1000
-set output '/home/joe/storage/albuquerque/longs-`printf "%06d" $num`.png'
+set output '`printf $outdir`longs-`printf "%06d" $num`.png'
 set multiplot layout 1,2 title
 unset key
 #set xrange [-60:60]
@@ -654,7 +726,7 @@ unset key
 set yrange [50:600]
 unset ztics
 set palette rgb 33,13,10 #rainbow (blue-green-yellow-red)
-set format cb "%1.1t{/Symbol \327}10^{%S}"
+set format cb "10^{%L}"
 #set format cb "10^{%S}"
 set logscale cb
 set colorbox horizontal user origin .25, .1 size .6,.03
@@ -666,17 +738,20 @@ set title "Electron Density with precipitation"
 splot 'long_slice_000yesboth.txt' using ((\$1*2)-58):(\$4/1000):(\$5) with pm3d title "alden"
 set title "Electron Density without precipitation"
 splot 'long_slice_000nooboth.txt' using ((\$1*2)-58):(\$4/1000):(\$5) with pm3d title "alden"
-#splot 'long_slice_000yes.txt' using (\$1*2):(\$4/1000):(\$5) with pm3d title "alden"
-#splot 'long_slice_000_negyes.txt' using (\$1*2):(\$4/1000):(\$5) with pm3d title "alden"
-#splot 'long_slice_180yes.txt' using (\$1*2):(\$4/1000):(\$5) with pm3d title "alden"
 
-set cbrange[.01:10]     
-#set logscale cb
-#splot 'long_slice_000rat.txt' using (\$1*2):(\$4/1000):(\$5) with pm3d title "alden"
 unset multiplot
-######conductivities######
+
+#########################longitudinal slice electron density RATIO #############################
+set output '`printf $outdir`alden_long_rat-`printf "%06d" $num`.png'
+set cbrange[.1:100]     
+splot 'long_slice_000rat.txt' using (\$1*2):(\$4/1000):(\$5) with pm3d title "alden"
+
+
+
+
+############################### Long Slice conductivities (Hall and Pederson ###################
 #set terminal pngcairo enhanced color font "Veranda,22" size 1500,1000
-set output '/home/joe/trillian/scratch/laptop/ctim_ion_vis/movies/conductivity-`printf "%06d" $num`.png'
+set output '`printf $outdir`conductivity-`printf "%06d" $num`.png'
 set multiplot layout 2,2 title
 set yrange[80:300]
 set xrange[-40:40]
@@ -696,14 +771,21 @@ set title "Pederson without Precipitation"
 splot 'long_slice_000nooboth.txt' using ((\$1*2)-58):(\$4/1000):(\$7) with pm3d title "pedc"
 #splot 'long_slice_000noo.txt' using (\$1*2):(\$4/1000):(\$7) with pm3d title "pedc"
 
+
+
+##########################long slice conductivities RATIO ####################################
 set cbrange[.01:10]
 set logscale cb
 #splot 'long_slice_000rat.txt' using (\$1*2):(\$4/1000):(\$7) with pm3d title "pedc"
 
-######joule heating######
+
+
+################################# long slice joule heating#####################################
 unset multiplot
-set output '/home/joe/trillian/scratch/laptop/ctim_ion_vis/movies/joule-`printf "%06d" $num`.png'
+set output '`printf $outdir`joule-`printf "%06d" $num`.png'
 set multiplot layout 1,2
+
+
 
 set colorbox horizontal user origin .2, .1 size .60,.03
 set title "joule with precipitation"
@@ -711,22 +793,27 @@ set cbrange[5E-7:1E-12]
 splot 'long_slice_000yesboth.txt' using ((\$1*2)-58):(\$4/1000):(\$8) with pm3d
 set title "joule without precipitation"
 splot 'long_slice_000nooboth.txt' using ((\$1*2)-58):(\$4/1000):(\$8) with pm3d
-set cbrange [.01:10]                                                            #set logscale cb
+
+
+############################## long slice joule heating RATIO #######################
+set cbrange [.01:10]                                                            
+#set logscale cb
 #splot 'long_slice_000rat.txt' using ((\$1*2)-100):(\$4/1000):(\$8) with pm3d
 
-######currents######
+############################### long slice currents ######################################
 unset multiplot
-set output '/home/joe/trillian/scratch/laptop/ctim_ion_vis/movies/currentsneg-`printf "%06d" $num`.png'
+set output '`printf $outdir`currents-`printf "%06d" $num`.png'
 set multiplot layout 2,2
 
+set format cb "%1.1t{/Symbol \327}10^{%S}"
 
-unset logscale cb
-#set cbrange[-5E-7:5E-7]
+
+set palette defined (-1E-6 "blue", 0 "white", 1E-6 "red")
+unset log cb
+set cbrange[-1E-6:1E-6]
 set yrange [80:300]
 set xrange [-40:40]
 unset colorbox
-#set cbrange[1E-5:5E-8]
-set cbrange[-1E-6:-1E-9]
 set title "jdenx with precipitation"
 splot 'long_slice_000yesboth.txt' using ((\$1*2)-58):(\$4/1000):(\$9) with pm3d title "jdenx"
 set title "jdenx without precipitation"
@@ -737,10 +824,26 @@ unset colorbox
 #splot 'long_slice_000rat.txt' using (\$1*2):(\$4/1000):(\$9) with pm3d title "jdenx"
 
 set title "jdeny with precipitation"
-#set cbrange[5E-6:5E-8]
 splot 'long_slice_000yesboth.txt' using ((\$1*2)-58):(\$4/1000):(\$10) with pm3d title "jdeny"
 set title "jdeny without precipitation"
 splot 'long_slice_000nooboth.txt' using ((\$1*2)-58):(\$4/1000):(\$10) with pm3d title "jdeny"
+
+unset multiplot
+############################## long slice currents RATIO ###############################
+set output '`printf $outdir`currents-rat-`printf "%06d" $num`.png'
+set multiplot layout 1,2
+
+set format cb "10^{%L}"
+set cbrange [.01:10]
+
+set title "ratio for J_x"
+splot 'long_slice_000rat.txt' using (\$1*2):(\$4/1000):(\$9) with pm3d title "ratio jdenx"
+
+set title "ratio for J_y"
+splot 'long_slice_000rat.txt' using (\$1*2):(\$4/1000):(\$10) with pm3d title "ratio jdeny"
+
+unset multiplot
+
 EOF
 
 gnuplot tmp2.gnu
