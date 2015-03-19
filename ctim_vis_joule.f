@@ -251,6 +251,7 @@ c     check the output and make sure it makes sense
 !!!!  output the data to plot
 c     longitude slice of the ionization rates
       lslice=5
+      
       open(unit=101, file="long_slice_000"//yes_no//".txt")
       open(unit=102, file="long_slice_000_neg"//yes_no//".txt")
       open(unit=106, file="long_slice_090"//yes_no//".txt")
@@ -263,13 +264,13 @@ c     longitude slice of the ionization rates
 
        if (K .eq. 8)then
 c     create xyz geo coordinates
-               the=(I-1)*2.*(3.14159/180)
+          the=(I-1)*2.*(3.14159/180)
 c               phi=(mod((((j-1)*18.)+180.0),360.0)-180)*(3.14159/180)   CCC not sure about this one
-               phi=((j-1)*18.)*(3.14159/180)-3.14159
-               R=6731+(ht(K,I,J)/1000)
-       xgeo=(6731+(ht(K,I,J)/1000))*sin(the)*cos(phi)
-       ygeo=(6731+(ht(K,I,J)/1000))*sin(the)*sin(phi)
-       zgeo=(6731+(ht(K,I,J)/1000))*cos(the)
+          phi=((j-1)*18.)*(3.14159/180)-3.14159
+          R=6731+(ht(K,I,J)/1000)
+          xgeo=(6731+(ht(K,I,J)/1000))*sin(the)*cos(phi)
+          ygeo=(6731+(ht(K,I,J)/1000))*sin(the)*sin(phi)
+          zgeo=(6731+(ht(K,I,J)/1000))*cos(the)
 c     print out a polar profile
           call ctim_cotr('geo','sm',xgeo,ygeo,zgeo,xgse,ygse,zgse)
           write(117,*)xgeo,ygeo,zgeo,xgse,ygse,zgse,ht(k,I,J),
@@ -289,17 +290,41 @@ c               phi=(mod((((1-1)*18.)+180.0),360.0)-180)*(3.14159/180)
      1alden(k,I,J),hallc(k,I,J),pedc(k,i,j),joule(k,i,j),jdenx(k,i,j),
      2jdeny(k,I,J),i,j,k
           endif
+          if (xgse .gt. jd_max)then
+             jd_max=xgse
+             j_day= j
+          endif
+          if (xgse .lt. jn_min)then
+             jn_min= xgse
+             j_night= j
+          endif
        endif
+      enddo
+      enddo
+      write(117,*)" "
+      enddo
+c      j_day=11
+c      j_night=1
 
-c     now print out lat slices
-               if (j .eq. 1 .and. I .lt. 29 ) then
-      write(101,*)(29-I),J,K,ht(k,I,J),alden(k,I,J),hallc(k,I,J),
-     1pedc(k,i,j),joule(k,i,j),jdenx(k,i,j),jdeny(k,I,J)
-      write(102,*)I+29,J+10,K,ht(k,I,J+10),alden(k,I,J+10),
-     1hallc(k,I,J+10),pedc(k,i,j+10),joule(k,i,j+10),
-     2jdenx(k,i,j+10),jdeny(k,I,J+10)
+      print*,"here is j_day= ",J_day
+      print*,"here is j_night= ",J_night
       
-               endif
+c     now print out lat slices
+      do I=1,29
+         do k=1,15
+         write(101,*)(29-I),J_DAY,K,ht(k,I,J_DAY),alden(k,I,J_DAY),
+     1        hallc(k,I,J_DAY),pedc(k,i,j_day),joule(k,i,j_day),
+     2        jdenx(k,i,j_day),jdeny(k,I,J_DAY)
+         write(102,*)I+29,j_night,K,ht(k,I,j_night),alden(k,I,j_night),
+     1        hallc(k,I,j_night),pedc(k,i,j_night),joule(k,i,j_night),
+     2        jdenx(k,i,j_night),jdeny(k,I,j_night)
+         enddo
+         write(101,*)" "
+         write(102,*)" "
+      enddo
+
+
+
                if (j .eq. 6) then
       write(106,*)I,J,K,ht(k,I,J),alden(k,I,J),hallc(k,I,J),pedc(k,i,j),
      1joule(k,i,j),jdenx(k,i,j),jdeny(k,I,J)
@@ -312,23 +337,23 @@ c     now print out lat slices
       write(116,*)I,J,K,ht(k,I,J),alden(k,I,J),hallc(k,I,J),pedc(k,i,j),
      1joule(k,i,j),jdenx(k,i,j),jdeny(k,I,J)
                endif
-            enddo
-            if (j .eq. 1 .and. I .lt. 29) then
-               write(101,*)" "
-               write(102,*)" "
-            endif
-            if (j .eq. 6) then
-               write(106,*)" "
-            endif
-            if (j .eq. 11) then
-               write(111,*)" "
-            endif
-            if (j .eq. 16) then
-               write(116,*)" "
-            endif
-         enddo
-         write(117,*)" "
-      enddo
+c            enddo
+c            if (j .eq. 1 .and. I .lt. 29) then
+c               write(101,*)" "
+c               write(102,*)" "
+c            endif
+c            if (j .eq. 6) then
+c               write(106,*)" "
+c            endif
+c            if (j .eq. 11) then
+c               write(111,*)" "
+c            endif
+c            if (j .eq. 16) then
+c               write(116,*)" "
+c            endif
+c         enddo
+c         write(117,*)" "
+c      enddo
 c      j=1
 c      do I=1,90                 !long                                                           
 c         do k=1,90              !height                                                          

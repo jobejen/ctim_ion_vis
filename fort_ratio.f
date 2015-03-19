@@ -1,5 +1,5 @@
       program fort_ratio
-      real yes(15,91,10),noo(15,91,10),ratio(15,91,10)
+      real yes(15,91,10),noo(15,91,10),ratio(15,91,10),jxdiff
       real altyes(21,91,16),altnoo(21,91,16),altratio(21,91,16)
 
       open(unit=101, file="long_slice_000yesboth.txt")
@@ -20,7 +20,7 @@
       open(unit=114, file="long_slice_270rat.txt")
       open(unit=115, file="alt_slice_k-10rat.txt")
 
-      do I=1,56
+      do I=1,58
       do J=1,15
          read(101,*) yes(J,I,1),yes(J,I,2),yes(J,I,3),yes(J,I,4),
      1yes(J,I,5),yes(J,I,6),yes(J,I,7),yes(J,I,8),yes(J,I,9),yes(J,I,10)
@@ -28,19 +28,19 @@
 c      read(101,*)dummy
       enddo
 
-      do I=1,56
+      do I=1,58
       do J=1,15
          read(106,*) noo(J,I,1),noo(J,I,2),noo(J,I,3),noo(J,I,4),
      1noo(J,I,5),noo(J,I,6),noo(J,I,7),noo(J,I,8),noo(J,I,9),noo(J,I,10)
       enddo
       enddo
 
-      do I=1,56
+      do I=1,58
       do J=1,15
       write(111,*) noo(J,I,1),noo(J,I,2),noo(J,I,3),
      1noo(J,I,4),yes(J,I,5)/noo(J,I,5),yes(J,I,6)/noo(J,I,6),
-     2yes(J,I,7)/noo(J,I,7),yes(J,I,8)/noo(J,I,8),yes(J,I,9)-noo(J,I,9),
-     3yes(J,I,10)-noo(J,I,10)
+     2yes(J,I,7)/noo(J,I,7),yes(J,I,8)/noo(J,I,8),
+     3abs(yes(J,I,9)-noo(J,I,9)),abs(yes(J,I,10)-noo(J,I,10))
       enddo
       write(111,*)" "
       enddo
@@ -65,12 +65,21 @@ c      read(101,*)dummy
 
       do I=1,91
       do J=1,21
-        write(115,*) altyes(J,I,1),altyes(J,I,2),altyes(J,I,3),
+         if ((altyes(J,I,12) .gt. 0) .and. (altnoo(J,I,12) .gt. 0))then
+            jxdif = (altyes(J,I,12)-altnoo(J,I,12)) * 1
+      else if ((altyes(J,I,12) .lt. 0).and.(altnoo(J,I,12) .lt. 0))then
+            jxdif = (altyes(J,I,12)-altnoo(J,I,12)) * (-1)
+         else
+            jxdif = altyes(J,I,12)-altnoo(J,I,12)
+            
+         endif
+               
+         write(115,*) altyes(J,I,1),altyes(J,I,2),altyes(J,I,3),
      1altyes(J,I,4),altyes(J,I,5),altyes(J,I,6),
      2altyes(J,I,7)/altnoo(J,I,7),altyes(J,I,8)/altnoo(J,I,8),
      3altyes(J,I,9)/altnoo(J,I,9),altyes(J,I,10)/altnoo(J,I,10),
-     4altyes(J,I,11)/altnoo(J,I,11),altyes(J,I,12)/altnoo(J,I,12),
-     5altyes(J,I,13)/altnoo(J,I,13),altyes(J,I,14)/altnoo(J,I,14),
+     4altyes(J,I,11)/altnoo(J,I,11),(altyes(J,I,12)-altnoo(J,I,12)),
+     5(altyes(J,I,13)-altnoo(J,I,13)),altyes(J,I,14)/altnoo(J,I,14),
      6altyes(J,I,15)/altnoo(J,I,15)
       enddo
       write(115,*)" "
