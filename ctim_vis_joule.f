@@ -170,8 +170,10 @@ c
       character*100 dummy1,dummy2,dummy3,dummy4,dummy5,dummy6
       character*20 dummy,satname(10)
       character*200 f3d,backgroundfile
+      character*4 csyear,csmonth,csday,cshour,csminute,cssecond
       character*10 altnumc,chtimenum
       character*3 yes_no
+      character*100 outdir
 !!!!! read in the inputs!!!!!
 c     get the file name of the ioc file to read in the data
       call getarg(1,f3d)
@@ -187,6 +189,21 @@ c     convert to an integer
       timenuminit=timenum
       print*,"timemun= ",timenum
       call getarg(14,yes_no)
+      call getarg(15,outdir)
+      call getarg(16,csyear)
+      read (csyear,'(I4)') syear
+      call getarg(17,csmonth)
+      read (csmonth,'(I2)') smonth
+      call getarg(18,csday)
+      read (csday,'(I2)') sday
+      call getarg(19,cshour)
+      read (cshour,'(I2)') shour
+      call getarg(20,csminute)
+      read (csminute,'(I2)') sminute
+      call getarg(21,cssecond)
+      read (cssecond,'(F5.2)') ssecond
+
+
 c     read the l1 from the ioc file
 
       call getf31(10,ndens,nnx,nny,nnz,l1(11),l2,it)
@@ -214,14 +231,14 @@ c      print*,"10"
 !!!! get the imte right to make transformations
 c     we need to initialize the coordinate transformation program by calling ctim_cotr_set
 c     this !!!WILL HAVE PROBLEMS!! for ends of months and end of years, I'll get to it when I need it
-      syear=2004
-      smonth=11
-      sday=7
-      shour=6
-      sminute=00
-      ssecond=00.00
-      nyear=2004
-      nmonth=11
+c      syear=2004
+c      smonth=11
+c      sday=7
+c      shour=6
+c      sminute=00
+c      ssecond=00.00
+      nyear=syear
+      nmonth=smonth
       nday=-1
       nhour=-1
       nminute=-1
