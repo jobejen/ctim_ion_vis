@@ -4,6 +4,19 @@
 # Joseph B. Jensen july 2014
 
 ####variables section####
+#need to feed in the start time for the run
+if [ -z "$1" ]
+  then
+    echo "don't forget the dates they should be"
+    echo "year month day hour minute "
+    exit
+fi
+syear=$1
+smonth=$2
+sday=$3
+shour=$4
+sminute=$5
+ssecond=000
 
 #controls the file time stamp increments by 60 each time it is run
 num=000000
@@ -19,21 +32,24 @@ var7=CTIM_jdeny_3D_GEO
 var8=CTIM_zkmheight_3D_GEO
 var9=CTIM_oprod_rate_nprec_3D_GEO
 var10=CTIM_oprod_rate_yprec_3D_GEO
-
+indir='/home/joe/trillian/2011_06_14_PF/target/'
+outdir='/home/joe/storage/2011_06_14_PF/results/'
 #compile the code if you need
 gfortran -o ctim_vis_joule.x ctim_vis_joule.f
 
 ####run the ctim_vis.f####
-yes_no=yes
+yes_no=$num
 #get the ioc files you can select just one, or the whole list
-#for a in /home/joe/trillian/wenhui_storms/storm_2004_11_07_`printf $yes_no`_precipitation/target/storm_2004_11_07_`printf $yes_no`_precipitation.ioc.046080 ; do
-for a in /Users/joe/trillian/wenhui_storms/storm_2004_11_07_`printf $yes_no`_precipitation/target/storm_2004_11_07_`printf $yes_no`_precipitation.ioc.046080 ; do
+for a in /home/joe/trillian/2011_06_14_PF/target/*ioc.* ; do 
+
+#/home/joe/trillian/wenhui_storms/storm_2004_11_07_`printf $yes_no`_precipitation/target/storm_2004_11_07_`printf $yes_no`_precipitation.ioc.0000* ; do
+#for a in /Users/joe/trillian/wenhui_storms/storm_2004_11_07_`printf $yes_no`_precipitation/target/storm_2004_11_07_`printf $yes_no`_precipitation.ioc.046080 ; do
 #for a in /home/joe/graphs/storm_2004_11_07_yes_precipitation.ioc.050400; do
 #for a in /home/jensen/trillian/scratch/tsmall/target/*ioc*.*; do
 #for a in /home/jensen/trillian/scratch/tsmall/target/*ioc*600; do
 
 #run the program note that this will loop for as many ioc files and you sent it
-./ctim_vis_joule.x $a $var1 $var2 $var3 $var4 $var5 $var6 $var7 $var8 $var9 $var10 $num $yes_no
+./ctim_vis_joule.x $a $var1 $var2 $var3 $var4 $var5 $var6 $var7 $var8 $var9 $var10 $num $yes_no $outdir $syear $smonth $sday $shour $sminute $ssecond
 
 #get the ioc files you can select just one, or the whole list
 #b=/home/joe/graphs/storm_2004_11_07_no_precipitation.ioc.050400
@@ -42,16 +58,16 @@ for a in /Users/joe/trillian/wenhui_storms/storm_2004_11_07_`printf $yes_no`_pre
 #b=/home/jensen/trillian/wenhui_storms/storm_2004_11_07_`printf $yes_no`_precipitation/target/storm_2004_11_07_`printf $yes_no`_precipitation.ioc.004680
 
 #### this is for precipitation turned off
-yes_no=none
-#b=/home/joe/trillian/wenhui_storms/storm_2004_11_07_`printf $yes_no`_precipitation/target/storm_2004_11_07_`printf $yes_no`_precipitation.ioc.046080
-b=/Users/joe/trillian/wenhui_storms/storm_2004_11_07_`printf $yes_no`_precipitation/target/storm_2004_11_07_`printf $yes_no`_precipitation.ioc.046080
+#yes_no=none
+#b=/home/joe/trillian/wenhui_storms/storm_2004_11_07_`printf $yes_no`_precipitation/target/storm_2004_11_07_`printf $yes_no`_precipitation.ioc.0000*
+#b=/Users/joe/trillian/wenhui_storms/storm_2004_11_07_`printf $yes_no`_precipitation/target/storm_2004_11_07_`printf $yes_no`_precipitation.ioc.046080
 #for a in /home/joe/trillian/wenhui_storms/storm_2004_11_07_`printf $yes_no`_precipitation/target/storm_2004_11_07_`printf $yes_no`_precipitation.ioc.046080; do
 #for a in /home/joe/trillian/scratch/tsmall/target/*ioc*.*; do
 #for a in /home/joe/trillian/scratch/tsmall/target/*ioc*600; do
 
-yes_no=noo
+#yes_no=noo
 #run the program note that this will loop for as many ioc files and you sent it
-./ctim_vis_joule.x $b $var1 $var2 $var3 $var4 $var5 $var6 $var7 $var8 $var9 $var10 $num $yes_no
+#./ctim_vis_joule.x $b $var1 $var2 $var3 $var4 $var5 $var6 $var7 $var8 $var9 $var10 $num $yes_no
 #make the plots
 ####graph the data####
 
@@ -59,7 +75,7 @@ yes_no=noo
 
 #the directory to put the output files in
 #outdir='/home/joe/storage/albuquerque/'
-outdir=''
+
 
 cat > tmp1.gnu <<EOF
 reset
@@ -68,7 +84,9 @@ reset
 #--------------------------------------------------------------------------------------------
 set terminal pngcairo enhanced color font "Veranda,22" size 1500,1000
 set output "`printf $outdir`polar_alden_150-`printf "%06d" $num`.png"
-set multiplot title "Electron Density at 150km"
+#1308002400 gives "2011 Jun 13 22:00:00"
+dd = 1308002400 + `printf $num`
+set multiplot title "Electron Density at 500 km and 150 km at ".strftime("%Y %b %d %H:%M:%S", dd)." UT"
 set pm3d depthorder
 set hidden3d
 r = 5700.
@@ -76,10 +94,10 @@ rz= 8000.
 set xrange[-r:r]
 set yrange[-r:r]
 set zrange[2000:rz]
-set cbrange[1E9:5E12]
+set cbrange[1E10:1E13]
 set cblabel "Electron Density (#/cm^3)"
 set palette rgb 33,13,10 #rainbow (blue-green-yellow-red)
-set colorbox horizontal user origin .1, .15 size .8,.04
+set colorbox horizontal user origin .1, .15 size .3,.04
 
 set format cb "%1.1t{/Symbol \327}10^{%S}"
 set format cb "10^{%L}"
@@ -94,7 +112,8 @@ unset ztics
 unset border
 
 #north pole
-set view 360,270,1.00
+set view 360,90,1.00
+#set view 360,270,1.00
 #set view 0,0,1.00
 ###left plot###
 set lmargin at screen .04
@@ -102,8 +121,9 @@ set rmargin at screen .48
 set bmargin at screen .25
 set tmargin at screen .92
 
-splot 'alt_slice_k-10yes.txt' using 4:5:6:(\$8) with pm3d 
-
+print "kup before"
+splot 'alt_slice_k-10kup.txt' using 4:5:6:(\$8) with pm3d 
+print "kup after"
 ### now make the polar grid overlayed ###
 unset key
 set style line 12 lc rgb 'black' lt 0 lw 1.5
@@ -142,7 +162,12 @@ set rmargin at screen .96
 set bmargin at screen .25
 set tmargin at screen .92
 
-splot 'alt_slice_k-10noo.txt' using 4:5:6:(\$8) with pm3d 
+set cbrange[1E9:5E12]
+set colorbox horizontal user origin .6, .15 size .3,.04
+
+print "kdn before"
+splot 'alt_slice_k-10kdn.txt' using 4:5:6:(\$8) with pm3d 
+print "kdn after"
 
 ### now make the polar grid overlayed ###
 unset key
@@ -169,13 +194,32 @@ set label "50" at 5239*cos(30),5239*sin(30) front center font "Veranda,14"
 #this plot cleans the edges of the cirle
 plot '+' using 1:(r1):(r2) with filledcurves lt rgb "white"
 
+unset polar 
+unset pm3d                                                                                           
+unset label
+unset cbrange                                                                                      
+unset log cb
+set lmargin at screen 0.0
+set rmargin at screen 1.0
+set bmargin at screen 0.0
+set tmargin at screen 1.0
+plot '7_unhlogo_web_hr.png' binary filetype=png origin=(4600,-5400) dx=.75 dy=1.125 with rgbalpha notitle
+set lmargin at screen .52
+set rmargin at screen .96
+set bmargin at screen .25
+set tmargin at screen .92
+
+set log cb
+
+
+set cbrange[1E9:5E12]
 unset multiplot
 
 ###########creating ratio of electron densities##################
 
 set terminal pngcairo enhanced color font "Veranda,22" size 1000,1000
 set output '`printf $outdir`polar_alden_rat-`printf "%06d" $num`.png'
-set multiplot title "Electron Density Ratio at 150km"
+set multiplot title "Electron Density Ratio at 500km and 150km"
 
 unset label 
 unset polar
@@ -220,7 +264,7 @@ set bmargin at screen .25
 set tmargin at screen .92
 
 set cbrange[1E-3:1E-7]
-splot 'alt_slice_k-10yes.txt' using 4:5:6:(\$10) with pm3d 
+splot 'alt_slice_k-10kup.txt' using 4:5:6:(\$10) with pm3d 
 
 ###set up the labels#####
 set label "6" at labnum,0 front center
@@ -246,7 +290,7 @@ set rmargin at screen .96
 set bmargin at screen .25
 set tmargin at screen .92
 
-splot 'alt_slice_k-10noo.txt' using 4:5:6:(\$10) with pm3d 
+splot 'alt_slice_k-10kdn.txt' using 4:5:6:(\$10) with pm3d 
 
 ###set up the labels#####
 set label "6" at labnum,0 front center
@@ -317,7 +361,7 @@ set bmargin at screen .25
 set tmargin at screen .92
 
 set cbrange[1E-3:1E-7]
-splot 'alt_slice_k-10yes.txt' using 4:5:6:(\$9) with pm3d 
+splot 'alt_slice_k-10kup.txt' using 4:5:6:(\$9) with pm3d 
 
 ###set up the labels#####
 set label "6" at labnum,0 front center
@@ -344,7 +388,7 @@ set rmargin at screen .96
 set bmargin at screen .25
 set tmargin at screen .92
 
-splot 'alt_slice_k-10noo.txt' using 4:5:6:(\$9) with pm3d 
+splot 'alt_slice_k-10kdn.txt' using 4:5:6:(\$9) with pm3d 
 
 set polar
 set grid
@@ -404,7 +448,8 @@ unset multiplot
 #
 set terminal pngcairo enhanced color font "Veranda,22" size 1500,1000
 set output '`printf $outdir`polar_joule-`printf "%06d" $num`.png'
-set multiplot title "Joule Heating 150km"
+dd = 1308002400 + `printf $num`                                                                     
+set multiplot title "Joule Heating at 500 km and 150 km at ".strftime("%Y %b %d %H:%M:%S", dd)." UT" 
 
 unset polar 
 unset label
@@ -414,10 +459,10 @@ set lmargin at screen .04
 set rmargin at screen .48
 set bmargin at screen .25
 set tmargin at screen .92
-
+set colorbox horizontal user origin .1, .15 size .3,.04
 set cbrange[1E-7:1E-12]
 
-splot 'alt_slice_k-10yes.txt' using 4:5:6:(\$11) with pm3d title "joule"
+splot 'alt_slice_k-10kup.txt' using 4:5:6:(\$11) with pm3d title "joule"
 
 ###set up the labels#####
 set label "6" at labnum,0 front center
@@ -445,8 +490,8 @@ set bmargin at screen .25
 set tmargin at screen .92
 
 set cbrange[1E-7:1E-12]
-
-splot 'alt_slice_k-10noo.txt' using 4:5:6:(\$11) with pm3d title "joule"
+set colorbox horizontal user origin .6, .15 size .3,.04
+splot 'alt_slice_k-10kdn.txt' using 4:5:6:(\$11) with pm3d title "joule"
 
 ###set up the labels#####
 set label "6" at labnum,0 front center
@@ -464,13 +509,32 @@ set grid
 #this plot cleans the edges of the cirle
 plot '+' using 1:(r1):(r2) with filledcurves lt rgb "white"
 
+
+unset polar 
+unset pm3d                                                                                           
+unset label
+unset cbrange                                                                                      
+unset log cb
+set lmargin at screen 0.0
+set rmargin at screen 1.0
+set bmargin at screen 0.0
+set tmargin at screen 1.0
+plot '7_unhlogo_web_hr.png' binary filetype=png origin=(4600,-5400) dx=.75 dy=1.125 with rgbalpha notitle
+set lmargin at screen .52
+set rmargin at screen .96
+set bmargin at screen .25
+set tmargin at screen .92
+
+set log cb
+
+
 unset multiplot
 
 #################### joule heating ratio plot ############################
 
 set terminal pngcairo enhanced color font "Veranda,22" size 1000,1000
 set output '`printf $outdir`joule_rat-`printf "%06d" $num`.png'
-set multiplot title "ratio of Joule heating at 150km"
+set multiplot title "ratio of Joule heating at 500km and 150km"
 
 unset label 
 unset polar
@@ -524,7 +588,7 @@ set palette defined (-1E-6 "blue", 0 "white", 1E-6 "red")
 unset log cb
 set cbrange[-1E-6:1E-6]
 
-splot 'alt_slice_k-10yes.txt' using 4:5:6:(\$12) with pm3d title "J_x"
+splot 'alt_slice_k-10kup.txt' using 4:5:6:(\$12) with pm3d title "J_x"
 
 ###set up the labels#####
 set label "6" at labnum,0 front center
@@ -552,7 +616,7 @@ set bmargin at screen .25
 set tmargin at screen .92
 
 
-splot 'alt_slice_k-10noo.txt' using 4:5:6:(\$12) with pm3d title "J_x"
+splot 'alt_slice_k-10kdn.txt' using 4:5:6:(\$12) with pm3d title "J_x"
 
 ###set up the labels#####
 set label "6" at labnum,0 front center
@@ -576,7 +640,7 @@ unset multiplot
 
 set terminal pngcairo enhanced color font "Veranda,22" size 1000,1000
 set output '`printf $outdir`currents-J_x-rat-`printf "%06d" $num`.png'
-set multiplot title "Difference of J_x currents at 150km"
+set multiplot title "Difference of J_x currents at 500km and 150km"
 
 unset label 
 unset polar
@@ -631,7 +695,7 @@ set palette defined (-1E-6 "blue", 0 "white", 1E-6 "red")
 unset log cb
 set cbrange[-1E-6:1E-6]
 
-splot 'alt_slice_k-10yes.txt' using 4:5:6:(\$13) with pm3d title "J_y"
+splot 'alt_slice_k-10kup.txt' using 4:5:6:(\$13) with pm3d title "J_y"
 
 ###set up the labels#####
 set label "6" at labnum,0 front center
@@ -659,7 +723,7 @@ set bmargin at screen .25
 set tmargin at screen .92
 
 
-splot 'alt_slice_k-10noo.txt' using 4:5:6:(\$13) with pm3d title "J_y"
+splot 'alt_slice_k-10kdn.txt' using 4:5:6:(\$13) with pm3d title "J_y"
 
 ###set up the labels#####
 set label "6" at labnum,0 front center
@@ -683,7 +747,7 @@ unset multiplot
 
 set terminal pngcairo enhanced color font "Veranda,22" size 1000,1000
 set output '`printf $outdir`currents-J_y-rat-`printf "%06d" $num`.png'
-set multiplot title "Difference of J_y currents at 150km"
+set multiplot title "Difference of J_y currents at 500km and 150km"
 
 unset label 
 unset polar
@@ -720,14 +784,16 @@ unset multiplot
 EOF
 
 gnuplot tmp1.gnu
-rm long_slice_000yesboth.txt
-rm long_slice_000nooboth.txt
-rm long_slice_000yesrev.txt
-rm long_slice_000noorev.txt
-tail -r long_slice_000yes.txt >>long_slice_000yesrev.txt
-tail -r long_slice_000noo.txt >>long_slice_000noorev.txt
-cat -s long_slice_000yesrev.txt long_slice_000_negyes.txt >> long_slice_000yesboth.txt
-cat -s long_slice_000noorev.txt long_slice_000_negnoo.txt >> long_slice_000nooboth.txt
+rm long_slice_000kupboth.txt
+rm long_slice_000kdnboth.txt
+rm long_slice_000kuprev.txt
+rm long_slice_000kdnrev.txt
+tac long_slice_000kup.txt >>long_slice_000kuprev.txt
+tac long_slice_000kdn.txt >>long_slice_000kdnrev.txt
+#tail -r long_slice_000kup.txt >>long_slice_000kuprev.txt
+#tail -r long_slice_000kdn.txt >>long_slice_000kdnrev.txt
+cat -s long_slice_000kuprev.txt long_slice_000_negkup.txt >> long_slice_000kupboth.txt
+cat -s long_slice_000kdnrev.txt long_slice_000_negkdn.txt >> long_slice_000kdnboth.txt
 ##create ratio plots
 gfortran -o fort_ratio.x fort_ratio.f
 ./fort_ratio.x
@@ -770,7 +836,7 @@ max_y=550
 min_y=80
 set object 1 polygon from min_x,min_y  to  max_x,min_y  to  max_x, max_y  to  min_x, max_y fillstyle solid noborder fillcolor rgb 'white' front
 set title "With Precipitation"
-splot 'long_slice_000yesboth.txt' using ((\$1*2)-58):(\$4/1000):(\$5) with pm3d title "alden"
+splot 'long_slice_000kupboth.txt' using ((\$1*2)-58):(\$4/1000):(\$5) with pm3d title "alden"
 
 #right plot
 set lmargin at screen .52
@@ -781,7 +847,7 @@ unset label 2
 set label 3 "Colatitude (deg)" at 20,-30
 
 set title "Without Precipitation"
-splot 'long_slice_000nooboth.txt' using ((\$1*2)-58):(\$4/1000):(\$5) with pm3d title "alden"
+splot 'long_slice_000kdnboth.txt' using ((\$1*2)-58):(\$4/1000):(\$5) with pm3d title "alden"
 
 unset multiplot
 
@@ -834,7 +900,7 @@ max_y=290
 min_y=80
 set object 1 polygon from min_x,min_y  to  max_x,min_y  to  max_x, max_y  to  min_x, max_y fillstyle solid noborder fillcolor rgb 'white' front
 set title "With Precipitation"
-splot 'long_slice_000yesboth.txt' using ((\$1*2)-58):(\$4/1000):(\$6) with pm3d 
+splot 'long_slice_000kupboth.txt' using ((\$1*2)-58):(\$4/1000):(\$6) with pm3d 
 
 #right plot
 set lmargin at screen .52
@@ -845,7 +911,7 @@ unset label 2
 set label 3 "Colatitude (deg)" at 30,20
 
 set title "Without Precipitation"
-splot 'long_slice_000nooboth.txt' using ((\$1*2)-58):(\$4/1000):(\$6) with pm3d 
+splot 'long_slice_000kdnboth.txt' using ((\$1*2)-58):(\$4/1000):(\$6) with pm3d 
 
 unset multiplot
 
@@ -898,7 +964,7 @@ max_y=290
 min_y=80
 set object 1 polygon from min_x,min_y  to  max_x,min_y  to  max_x, max_y  to  min_x, max_y fillstyle solid noborder fillcolor rgb 'white' front
 set title "With Precipitation"
-splot 'long_slice_000yesboth.txt' using ((\$1*2)-58):(\$4/1000):(\$7) with pm3d 
+splot 'long_slice_000kupboth.txt' using ((\$1*2)-58):(\$4/1000):(\$7) with pm3d 
 
 #right plot
 set lmargin at screen .52
@@ -909,7 +975,7 @@ unset label 2
 set label 3 "Colatitude (deg)" at 30,20
 
 set title "Without Precipitation"
-splot 'long_slice_000nooboth.txt' using ((\$1*2)-58):(\$4/1000):(\$7) with pm3d 
+splot 'long_slice_000kdnboth.txt' using ((\$1*2)-58):(\$4/1000):(\$7) with pm3d 
 
 unset multiplot
 
@@ -961,7 +1027,7 @@ max_y=550
 min_y=80
 set object 1 polygon from min_x,min_y  to  max_x,min_y  to  max_x, max_y  to  min_x, max_y fillstyle solid noborder fillcolor rgb 'white' front
 set title "With Precipitation"
-splot 'long_slice_000yesboth.txt' using ((\$1*2)-58):(\$4/1000):(\$8) with pm3d title "alden"
+splot 'long_slice_000kupboth.txt' using ((\$1*2)-58):(\$4/1000):(\$8) with pm3d title "alden"
 
 #right plot
 set lmargin at screen .52
@@ -972,7 +1038,7 @@ unset label 2
 set label 3 "Colatitude (deg)" at 20,-30
 
 set title "Without Precipitation"
-splot 'long_slice_000nooboth.txt' using ((\$1*2)-58):(\$4/1000):(\$8) with pm3d title "alden"
+splot 'long_slice_000kdnboth.txt' using ((\$1*2)-58):(\$4/1000):(\$8) with pm3d title "alden"
 
 unset multiplot
 
@@ -1024,7 +1090,7 @@ max_y=290
 min_y=80
 set object 1 polygon from min_x,min_y  to  max_x,min_y  to  max_x, max_y  to  min_x, max_y fillstyle solid noborder fillcolor rgb 'white' front
 set title "With Precipitation"
-splot 'long_slice_000yesboth.txt' using ((\$1*2)-58):(\$4/1000):(\$9) with pm3d title "J_x yes"
+splot 'long_slice_000kupboth.txt' using ((\$1*2)-58):(\$4/1000):(\$9) with pm3d title "J_x yes"
 
 #right plot
 set lmargin at screen .52
@@ -1036,7 +1102,7 @@ set label 3 "Colatitude (deg)" at 30,20
 
 
 set title "Without Precipitation"
-splot 'long_slice_000nooboth.txt' using ((\$1*2)-58):(\$4/1000):(\$9) with pm3d title "J_x no"
+splot 'long_slice_000kdnboth.txt' using ((\$1*2)-58):(\$4/1000):(\$9) with pm3d title "J_x no"
 
 unset multiplot
 
@@ -1090,7 +1156,7 @@ max_y=290
 min_y=80
 set object 1 polygon from min_x,min_y  to  max_x,min_y  to  max_x, max_y  to  min_x, max_y fillstyle solid noborder fillcolor rgb 'white' front
 set title "With Precipitation"
-splot 'long_slice_000yesboth.txt' using ((\$1*2)-58):(\$4/1000):(\$10) with pm3d title "J_x yes"
+splot 'long_slice_000kupboth.txt' using ((\$1*2)-58):(\$4/1000):(\$10) with pm3d title "J_x yes"
 
 #right plot
 set lmargin at screen .52
@@ -1101,7 +1167,7 @@ unset label 2
 set label 3 "Colatitude (deg)" at 30,20
 
 set title "Without Precipitation"
-splot 'long_slice_000nooboth.txt' using ((\$1*2)-58):(\$4/1000):(\$10) with pm3d title "J_x no"
+splot 'long_slice_000kdnboth.txt' using ((\$1*2)-58):(\$4/1000):(\$10) with pm3d title "J_x no"
 
 unset multiplot
 

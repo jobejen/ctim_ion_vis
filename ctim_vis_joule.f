@@ -159,14 +159,14 @@ c
       real zkmheight(90,90,20),oprod_rate_nprec(90,90,20)
       real oprod_rate_yprec(90,90,20),alden(15,91,20)
       real hallc(15,91,20),pedc(15,91,20),joule(15,91,20)
-      real jdenx(15,91,20),jdeny(15,91,20)
+      real jdenx(15,91,20),jdeny(15,91,20),ndens(15,91,20)
       real*8 ssecond,seconds,xgeo,ygeo,zgeo,xgse,ygse,zgse,lat,long
       real satx(10),saty(10),satz(10),satxgeo(10),satygeo(10)
       real satzgeo(10),interheight,mindis,val1,val2,avl3,val4
       integer altnum,syear,smonth,sday,shour,sminute,sattime(10)
       integer timenum,timenuminit,nyear,nmonth,nday,nhour,nminute,nsat
       integer pos1,pos2,pos3,pos4,pos5
-      character*80 l1(10),fgrid,l2
+      character*80 l1(11),fgrid,l2
       character*100 dummy1,dummy2,dummy3,dummy4,dummy5,dummy6
       character*20 dummy,satname(10)
       character*200 f3d,backgroundfile
@@ -177,18 +177,19 @@ c     get the file name of the ioc file to read in the data
       call getarg(1,f3d)
       open(10,file=f3d,status='old')
 c     get the variables to look at (e.g. density or electron energy)
-      do I=1,10
+      do I=1,11
       call getarg(I+1,l1(I))
       enddo
 c     get the altitude/pressure height layer (1-15)
-      call getarg(12,chtimenum) 
+      call getarg(13,chtimenum) 
 c     convert to an integer
       read (chtimenum,'(I10)') timenum
       timenuminit=timenum
       print*,"timemun= ",timenum
-      call getarg(13,yes_no)
+      call getarg(14,yes_no)
 c     read the l1 from the ioc file
 
+      call getf31(10,ndens,nnx,nny,nnz,l1(11),l2,it)
       call getf31(10,ht,nnx,nny,nnz,l1(1),l2,it)
 c      print*,"1"
       call getf31(10,alden,nnx,nny,nnz,l1(2),l2,it)
@@ -275,7 +276,7 @@ c     print out a polar profile
           call ctim_cotr('geo','sm',xgeo,ygeo,zgeo,xgse,ygse,zgse)
           write(117,*)xgeo,ygeo,zgeo,xgse,ygse,zgse,ht(k,I,J),
      1alden(k,I,J),hallc(k,I,J),pedc(k,i,j),joule(k,i,j),jdenx(k,i,j),
-     2jdeny(k,I,J),i,j,k
+     2jdeny(k,I,J),ndens(K,I,J),i,j,k
 c     add the last slice so it closes
           if (J .eq. 20) then 
                the=(I-1)*2.*(3.14159/180)
@@ -288,7 +289,7 @@ c               phi=(mod((((1-1)*18.)+180.0),360.0)-180)*(3.14159/180)
           call ctim_cotr('geo','sm',xgeo,ygeo,zgeo,xgse,ygse,zgse)
           write(117,*)xgeo,ygeo,zgeo,xgse,ygse,zgse,ht(k,I,J),
      1alden(k,I,J),hallc(k,I,J),pedc(k,i,j),joule(k,i,j),jdenx(k,i,j),
-     2jdeny(k,I,J),i,j,k
+     2jdeny(k,I,J),ndens(K,I,J),i,j,k
           endif
           if (xgse .gt. jd_max)then
              jd_max=xgse
@@ -312,12 +313,14 @@ c      j_night=1
 c     now print out lat slices
       do I=1,29
          do k=1,15
-         write(101,*)(29-I),J_DAY,K,ht(k,I,J_DAY),alden(k,I,J_DAY),
-     1        hallc(k,I,J_DAY),pedc(k,i,j_day),joule(k,i,j_day),
-     2        jdenx(k,i,j_day),jdeny(k,I,J_DAY)
-         write(102,*)I+29,j_night,K,ht(k,I,j_night),alden(k,I,j_night),
-     1        hallc(k,I,j_night),pedc(k,i,j_night),joule(k,i,j_night),
-     2        jdenx(k,i,j_night),jdeny(k,I,j_night)
+         write(101,*)(29-I),J_DAY,k,ht(k,I,J_DAY),
+     1alden(k,I,J_DAY),hallc(k,I,J_DAY),pedc(k,i,j_day),
+     2joule(k,i,j_day),jdenx(k,i,j_day),jdeny(k,I,J_DAY),
+     3ndens(k,i,J_Day)
+         write(102,*)I+29,j_night,16-K,ht(16-k,I,j_night),
+     1alden(16-k,I,j_night),hallc(16-k,I,j_night),pedc(16-k,i,j_night),
+     2joule(16-k,i,j_night),jdenx(16-k,i,j_night),jdeny(16-k,I,j_night),
+     3ndens(16-k,i,j_night)
          enddo
          write(101,*)" "
          write(102,*)" "
@@ -327,15 +330,15 @@ c     now print out lat slices
 
                if (j .eq. 6) then
       write(106,*)I,J,K,ht(k,I,J),alden(k,I,J),hallc(k,I,J),pedc(k,i,j),
-     1joule(k,i,j),jdenx(k,i,j),jdeny(k,I,J)
+     1joule(k,i,j),jdenx(k,i,j),jdeny(k,I,J),ndens(K,I,J)
                endif
                if (j .eq. 11) then
       write(111,*)I,J,K,ht(k,I,J),alden(k,I,J),hallc(k,I,J),pedc(k,i,j),
-     1joule(k,i,j),jdenx(k,i,j),jdeny(k,I,J)
+     1joule(k,i,j),jdenx(k,i,j),jdeny(k,I,J),ndens(K,I,J)
                endif
                if (j .eq. 16) then
       write(116,*)I,J,K,ht(k,I,J),alden(k,I,J),hallc(k,I,J),pedc(k,i,j),
-     1joule(k,i,j),jdenx(k,i,j),jdeny(k,I,J)
+     1joule(k,i,j),jdenx(k,i,j),jdeny(k,I,J),ndens(K,I,J)
                endif
 c            enddo
 c            if (j .eq. 1 .and. I .lt. 29) then
