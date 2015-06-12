@@ -60,7 +60,7 @@ for a in /home/joe/trillian/wenhui_storms/storm_2004_11_07_yes_precipitation_nde
 
 #### this is for precipitation turned off
 #yes_no=none
-b=/home/joe/storage/2004_nov7_yes_prec/target/target/*ioc.016200*
+b=/home/joe/trillian/wenhui_storms/storm_2004_11_07_none_precipitation_ndens/target/storm_2004_11_07_none_precipitation_ndens.ioc.013860
 #b=/Users/joe/trillian/wenhui_storms/storm_2004_11_07_`printf $yes_no`_precipitation/target/storm_2004_11_07_`printf $yes_no`_precipitation.ioc.046080
 #for a in /home/joe/trillian/wenhui_storms/storm_2004_11_07_`printf $yes_no`_precipitation/target/storm_2004_11_07_`printf $yes_no`_precipitation.ioc.046080; do
 #for a in /home/joe/trillian/scratch/tsmall/target/*ioc*.*; do
@@ -83,7 +83,7 @@ reset
 #--------------------------------------------------------------------------------------------
 #---------polar orthonographic 150 km electron density plots particle yes vs no -------------
 #--------------------------------------------------------------------------------------------
-set terminal pngcairo enhanced color font "Veranda,22" size 1500,1000
+set terminal pngcairo enhanced color font "Veranda,24" size 1500,1000
 set output "`printf $outdir`polar_alden_150-`printf "%06d" $num`.png"
 #1308002400 gives "2011 Jun 13 22:00:00"
 dd = 1308002400 + `printf $num`
@@ -98,7 +98,7 @@ set zrange[2000:rz]
 set cbrange[1E9:5E12]
 set cblabel "Electron Density (#/cm^3)"
 set palette rgb 33,13,10 #rainbow (blue-green-yellow-red)
-set colorbox horizontal user origin .1, .15 size .3,.04
+set colorbox horizontal user origin .2, .15 size .6,.04
 
 set format cb "%1.1t{/Symbol \327}10^{%S}"
 set format cb "10^{%L}"
@@ -164,7 +164,7 @@ set bmargin at screen .25
 set tmargin at screen .92
 
 set cbrange[1E9:5E12]
-set colorbox horizontal user origin .6, .15 size .3,.04
+
 
 print "noo before"
 splot 'alt_slice_k-10noo.txt' using 4:5:6:(\$8) with pm3d 
@@ -204,7 +204,7 @@ set lmargin at screen 0.0
 set rmargin at screen 1.0
 set bmargin at screen 0.0
 set tmargin at screen 1.0
-plot '7_unhlogo_web_hr.png' binary filetype=png origin=(4600,-5400) dx=.75 dy=1.125 with rgbalpha notitle
+#plot '7_unhlogo_web_hr.png' binary filetype=png origin=(4600,-5400) dx=.75 dy=1.125 with rgbalpha notitle
 set lmargin at screen .52
 set rmargin at screen .96
 set bmargin at screen .25
@@ -216,11 +216,11 @@ set log cb
 set cbrange[1E9:5E12]
 unset multiplot
 
-###########creating ratio of electron densities##################
+###########creating Ratio of electron densities##################
 
-set terminal pngcairo enhanced color font "Veranda,22" size 1000,1000
+set terminal pngcairo enhanced color font "Veranda,24" size 1000,1000
 set output '`printf $outdir`polar_alden_rat-`printf "%06d" $num`.png'
-set multiplot title "Electron Density Ratio at 500km and 150km"
+set multiplot title "Electron Density Ratio at 150km"
 
 unset label 
 unset polar
@@ -251,7 +251,7 @@ plot '+' using 1:(r1):(r2) with filledcurves lt rgb "white"
 unset multiplot
 
 ######################### Pederson conductivity polar plots ######################
-set terminal pngcairo enhanced color font "Veranda,22" size 1500,1000
+set terminal pngcairo enhanced color font "Veranda,24" size 1500,1000
 set output '`printf $outdir`polar_ped-cond-`printf "%06d" $num`.png'
 set multiplot title "Pederson Conductivities 150km"
 
@@ -263,7 +263,7 @@ set lmargin at screen .04
 set rmargin at screen .48
 set bmargin at screen .25
 set tmargin at screen .92
-
+set colorbox horizontal user origin .2, .15 size .6,.04
 set cbrange[1E-3:1E-7]
 splot 'alt_slice_k-10yes.txt' using 4:5:6:(\$10) with pm3d 
 
@@ -312,9 +312,9 @@ plot '+' using 1:(r1):(r2) with filledcurves lt rgb "white"
 
 unset multiplot
 
-###########creating ratio of pederson conductivites##################
+###########creating Ratio of pederson conductivites##################
 
-set terminal pngcairo enhanced color font "Veranda,22" size 1000,1000
+set terminal pngcairo enhanced color font "Veranda,24" size 1000,1000
 set output '`printf $outdir`Ped-cond_rat-`printf "%06d" $num`.png'
 set multiplot title "Pederson Conductivity Ratio"
 
@@ -348,7 +348,7 @@ plot '+' using 1:(r1):(r2) with filledcurves lt rgb "white"
 unset multiplot
 
 ######################### Hall conductivity polar plots ######################
-set terminal pngcairo enhanced color font "Veranda,22" size 1500,1000
+set terminal pngcairo enhanced color font "Veranda,24" size 1500,1000
 set output '`printf $outdir`polar_hall-cond-`printf "%06d" $num`.png'
 set multiplot title "Hall Conductivities 150km"
 
@@ -360,7 +360,7 @@ set lmargin at screen .04
 set rmargin at screen .48
 set bmargin at screen .25
 set tmargin at screen .92
-
+set colorbox horizontal user origin .2, .15 size .6,.04
 set cbrange[1E-3:1E-7]
 splot 'alt_slice_k-10yes.txt' using 4:5:6:(\$9) with pm3d 
 
@@ -409,11 +409,11 @@ plot '+' using 1:(r1):(r2) with filledcurves lt rgb "white"
 
 unset multiplot
 
-###########creating ratio of Hall conductivities##################
+###########creating Ratio of Hall conductivities##################
 
-set terminal pngcairo enhanced color font "Veranda,22" size 1000,1000
+set terminal pngcairo enhanced color font "Veranda,24" size 1000,1000
 set output '`printf $outdir`hall-cond_rat-`printf "%06d" $num`.png'
-set multiplot title "ratio of Hall Conductivities"
+set multiplot title "Ratio of Hall Conductivities"
 
 unset label 
 unset polar
@@ -447,9 +447,8 @@ unset multiplot
 #
 ############################## Joule heating polar ##############################
 #
-set terminal pngcairo enhanced color font "Veranda,22" size 1500,1000
+set terminal pngcairo enhanced color font "Veranda,24" size 1500,1000
 set output '`printf $outdir`polar_joule-`printf "%06d" $num`.png'
-dd = 1308002400 + `printf $num`                                                                     
 set multiplot title "Joule Heating at 150 km" 
 
 unset polar 
@@ -460,7 +459,7 @@ set lmargin at screen .04
 set rmargin at screen .48
 set bmargin at screen .25
 set tmargin at screen .92
-set colorbox horizontal user origin .1, .15 size .3,.04
+set colorbox horizontal user origin .2, .15 size .6,.04
 
 set cbrange[1E-7:1E-12]
 splot 'alt_slice_k-10yes.txt' using 4:5:6:(\$11) with pm3d title "joule"
@@ -491,7 +490,6 @@ set bmargin at screen .25
 set tmargin at screen .92
 
 set cbrange[1E-7:1E-12]
-set colorbox horizontal user origin .6, .15 size .3,.04
 splot 'alt_slice_k-10noo.txt' using 4:5:6:(\$11) with pm3d title "joule"
 
 ###set up the labels#####
@@ -520,7 +518,7 @@ set lmargin at screen 0.0
 set rmargin at screen 1.0
 set bmargin at screen 0.0
 set tmargin at screen 1.0
-plot '7_unhlogo_web_hr.png' binary filetype=png origin=(4600,-5400) dx=.75 dy=1.125 with rgbalpha notitle
+#plot '7_unhlogo_web_hr.png' binary filetype=png origin=(4600,-5400) dx=.75 dy=1.125 with rgbalpha notitle
 set lmargin at screen .52
 set rmargin at screen .96
 set bmargin at screen .25
@@ -531,15 +529,15 @@ set log cb
 
 unset multiplot
 
-#################### joule heating ratio plot ############################
+#################### joule heating Ratio plot ############################
 
-set terminal pngcairo enhanced color font "Veranda,22" size 1000,1000
+set terminal pngcairo enhanced color font "Veranda,24" size 1000,1000
 set output '`printf $outdir`joule_rat-`printf "%06d" $num`.png'
-set multiplot title "ratio of Joule heating at 500km and 150km"
+set multiplot title "Ratio of Joule heating at 150km"
 
 unset label 
 unset polar
-
+set colorbox horizontal user origin .2, .15 size .6,.04
 set cbrange [.1:100]
 set lmargin at screen .17
 set rmargin at screen .83
@@ -570,7 +568,7 @@ unset multiplot
 #
 ############################## currents J_x polar ##############################
 #
-set terminal pngcairo enhanced color font "Veranda,22" size 1500,1000
+set terminal pngcairo enhanced color font "Veranda,24" size 1500,1000
 set output '`printf $outdir`polar_currents-Jx-`printf "%06d" $num`.png'
 set multiplot title "J_x Current Density 150km"
 
@@ -578,7 +576,7 @@ unset polar
 unset label
 set cblabel "Current Density ()"
 set format cb "%1.1t{/Symbol \327}10^{%S}"
-
+set colorbox horizontal user origin .2, .15 size .6,.04
 ###left plot###
 set lmargin at screen .04
 set rmargin at screen .48
@@ -637,11 +635,11 @@ plot '+' using 1:(r1):(r2) with filledcurves lt rgb "white"
 
 unset multiplot
 
-#################### J_x currents ratio plot ############################
+#################### J_x currents Ratio plot ############################
 
-set terminal pngcairo enhanced color font "Veranda,22" size 1000,1000
+set terminal pngcairo enhanced color font "Veranda,24" size 1000,1000
 set output '`printf $outdir`currents-J_x-rat-`printf "%06d" $num`.png'
-set multiplot title "Difference of J_x currents at 500km and 150km"
+set multiplot title "Difference of J_x currents at 150km"
 
 unset label 
 unset polar
@@ -678,7 +676,7 @@ unset multiplot
 #
 ############################## currents J_y polar ##############################
 #
-set terminal pngcairo enhanced color font "Veranda,22" size 1500,1000
+set terminal pngcairo enhanced color font "Veranda,24" size 1500,1000
 set output '`printf $outdir`polar_currents-Jy-`printf "%06d" $num`.png'
 set multiplot title "J_y current density 150km"
 
@@ -690,7 +688,7 @@ set lmargin at screen .04
 set rmargin at screen .48
 set bmargin at screen .25
 set tmargin at screen .92
-
+set colorbox horizontal user origin .2, .15 size .6,.04
 set palette defined (-1E-6 "blue", 0 "white", 1E-6 "red")
 #set palette rgb 33,13,10 #rainbow (blue-green-white-yellow-red)
 unset log cb
@@ -744,9 +742,9 @@ plot '+' using 1:(r1):(r2) with filledcurves lt rgb "white"
 
 unset multiplot
 
-#################### J_y currents ratio plot ############################
+#################### J_y currents Ratio plot ############################
 
-set terminal pngcairo enhanced color font "Veranda,22" size 1000,1000
+set terminal pngcairo enhanced color font "Veranda,24" size 1000,1000
 set output '`printf $outdir`currents-J_y-rat-`printf "%06d" $num`.png'
 set multiplot title "Difference of J_y currents and 150km"
 
@@ -781,6 +779,170 @@ set grid
 plot '+' using 1:(r1):(r2) with filledcurves lt rgb "white"
 
 unset multiplot
+
+############################ ndens ##################
+unset polar
+unset label
+set terminal pngcairo enhanced color font "Veranda,24" size 1500,1000                                                                                 
+set output "`printf $outdir`polar_ndens_150-`printf "%06d" $num`.png"                                                                                 
+set multiplot title "Neutral Density at 150 km"
+set cbrange[350:450]
+set cblabel "Neutral Density (kg/m^3*E-11) "                                                                                                               
+set palette rgb 33,13,10 #rainbow (blue-green-yellow-red)                                                                                             
+set colorbox horizontal user origin .2, .15 size .6,.04                                                                                                                                                      
+set format cb "%1.1t{/Symbol \327}10^{%S}"                                                                                                            
+set format cb "10^{%L}"
+unset format cb                                                 
+#set logscale cb                                                                                                                                       
+                                                                                                                                                     
+unset key                                                                                                                                             
+unset ylabel                                                                                                                                          
+unset ytics                                                                                                                                           
+unset xlabel                                                                                                                                          
+unset xtics                                                                                                                                           
+unset ztics                                                                                                                                           
+unset border                                                                     
+#north pole                                                                                                                                           
+set view 360,90,1.00                                                                                                                                  
+#set view 360,270,1.00                                                                                                                                
+#set view 0,0,1.00                                                                                                                                    
+###left plot###                                                                                                                                       
+set lmargin at screen .04                                                                                                                            
+set rmargin at screen .48                                                                                                                             
+set bmargin at screen .25                                                                                                                             
+set tmargin at screen .92                                                                                                                             
+                                                                                                                                                      
+splot 'alt_slice_k-10yes.txt' using 4:5:6:((\$14)) with pm3d                                                                                    
+
+### now make the polar grid overlayed ###                                                                                                             
+unset key                                                                                                                                             
+set style line 12 lc rgb 'black' lt 0 lw 1.5                                                                                                          
+set grid polar ls 12                                                                                                                                  
+set polar                                                                                                                                             
+set angles degrees                                                                                                                                    
+set rtics format '' scale 0                                                                                                                           
+#used R = 6480  
+set rtics (1187,2339,3420,4397,5239,5924,6427,6736,6840)                                                                                              
+set rrange[0:r]                                                                                                                                       
+unset raxis                                                                                                                                           
+r1=5239                                                                                                                                               
+r2=10000                                                                                                                                              
+                                                                                                                                                      
+##add labels                                                                                                                                          
+labnum=5500                                                                                                                                           
+set label "6" at labnum,0 front center                                                                                                                
+set label "12" at 0, labnum front center                                                                                                              
+set label "18" at -labnum, 0 front center                                                                                                             
+set label "24" at 0,-labnum front center                                                                                                              
+set label "10" at 1187*cos(30),1187*sin(30) front center font "Veranda,14"
+set label "20" at 2339*cos(30),2339*sin(30) front center font "Veranda,14"
+set label "30" at 3420*cos(30),3420*sin(30) front center font "Veranda,14"
+set label "40" at 4397*cos(30),4397*sin(30) front center font "Veranda,14"
+set label "50" at 5239*cos(30),5239*sin(30) front center font "Veranda,14"               
+
+#this plot cleans the edges of the cirle and plots the grid liens
+plot '+' using 1:(r1):(r2) with filledcurves lt rgb "white"                                          
+
+                                      
+        #############do the right plot##############                               
+unset polar                                                                
+unset label                                                                
+set lmargin at screen .52                                                  
+set rmargin at screen .96                                                  
+set bmargin at screen .25                                                  
+set tmargin at screen .92                                                  
+                                                                           
+#set cbrange[1E9:5E12]                                                      
+
+print "noo before"                                                         
+splot 'alt_slice_k-10noo.txt' using 4:5:6:((\$14)) with pm3d                  
+print "noo after"                                                          
+                                                                           
+### now make the polar grid overlayed ###                                  
+unset key                                                                  
+set style line 12 lc rgb 'black' lt 0 lw 1.5                               
+set grid polar ls 12                                                       
+set polar                                                                  
+set rtics format '' scale 0                                                
+#for R we used 6840                                                        
+set rtics (1187,2339,3420,4397,5239,5924,6427,6736,6840)                   
+set rrange[0:r]                                                            
+unset raxis                                                                
+                                                                           
+###set up the labels                                                       
+set label "6" at labnum,0 front center                                     
+set label "12" at 0, labnum front center                                   
+set label "18" at -labnum, 0 front center                                  
+set label "24" at 0,-labnum front center                                   
+set label "10" at 1187*cos(30),1187*sin(30) front center font "Veranda,14"
+set label "20" at 2339*cos(30),2339*sin(30) front center font "Veranda,14"
+set label "30" at 3420*cos(30),3420*sin(30) front center font "Veranda,14"
+set label "40" at 4397*cos(30),4397*sin(30) front center font "Veranda,14"
+set label "50" at 5239*cos(30),5239*sin(30) front center font "Veranda,14"
+  
+#this plot cleans the edges of the cirle                                   
+plot '+' using 1:(r1):(r2) with filledcurves lt rgb "white"                
+                                                                           
+unset polar                                                                
+unset pm3d                                                                
+                                                                           
+unset label                                                                
+unset cbrange                                                             
+                                                                           
+unset log cb                                                               
+set lmargin at screen 0.0                                                  
+set rmargin at screen 1.0                                                  
+set bmargin at screen 0.0                                                  
+set tmargin at screen 1.0                                                  
+#plot '7_unhlogo_web_hr.png' binary filetype=png origin=(4600,-5400) dx=.75\
+ dy=1.125 with rgbalpha notitle                                            
+set lmargin at screen .52                                                  
+set rmargin at screen .96                                                  
+set bmargin at screen .25                                                  
+set tmargin at screen .92                                                  
+                                                                           
+set log cb                                                                 
+unset multiplot
+###########creating Ratio of neutral densities##################          
+                                                                           
+set terminal pngcairo enhanced color font "Veranda,24" size 1000,1000      
+set output '`printf $outdir`polar_ndens_rat-`printf "%06d" $num`.png'      
+set multiplot title "Neutral Density Ratio at 150km"            
+                                                                           
+unset label                                                                
+unset polar                                                                
+unset logscale cb
+set cblabel "Ratio"                                                        
+set cbrange [.9:1.1]                                                        
+set palette defined (-1E-6 "blue", 0 "white", 1E-6 "red")                       
+set format cb "%1.1t{/Symbol \327}10^{%S}"
+unset format cb
+set lmargin at screen .17                                                  
+set rmargin at screen .83                                                  
+set bmargin at screen .25                                                  
+set tmargin at screen .92                                                  
+                                                                           
+splot 'alt_slice_k-10rat.txt' using 4:5:6:(\$14) with pm3d                  
+                                                                           
+###set up the labels                                                       
+set label "6" at labnum,0 front center                                     
+set label "12" at 0, labnum front center                                   
+set label "18" at -labnum, 0 front center                                  
+set label "24" at 0,-labnum front center                                   
+set label "10" at 1187*cos(30),1187*sin(30) front center font "Veranda,14"
+set label "20" at 2339*cos(30),2339*sin(30) front center font "Veranda,14"
+set label "30" at 3420*cos(30),3420*sin(30) front center font "Veranda,14"
+set label "40" at 4397*cos(30),4397*sin(30) front center font "Veranda,14"
+set label "50" at 5239*cos(30),5239*sin(30) front center font "Veranda,14"
+set polar                                                                  
+set grid                                                                   
+#this plot cleans the edges of the cirle                                   
+plot '+' using 1:(r1):(r2) with filledcurves lt rgb "white"                
+                                                                           
+unset multiplot                                                                                                                         
+                                                                           
+set cbrange[1E9:5E12]                                                      
+unset multiplot                                                                   
 
 EOF
 
@@ -858,7 +1020,7 @@ set output '`printf $outdir`alden_long_rat-`printf "%06d" $num`.png'
 unset margin
 set bmargin at screen .3
 set colorbox horizontal user origin .25, .13 size .5,.03
-set cblabel "ratio of with/without precipitation"
+set cblabel "Ratio of with/without precipitation"
 set label 3 "Colatitude (deg)" at 0,-23 center
 set cbrange[.1:100]     
 
@@ -916,14 +1078,14 @@ splot 'long_slice_000nooboth.txt' using ((\$1*2)-58):(\$4/1000):(\$6) with pm3d
 
 unset multiplot
 
-######################## pederson conductivity ratio ###############################
+######################## pederson conductivity Ratio ###############################
 set terminal pngcairo enhanced color font "Veranda,22" size 1000,1000
 set output '`printf $outdir`long_ped_rat-`printf "%06d" $num`.png'
 unset margin
 set bmargin at screen .3
 set colorbox horizontal user origin .25, .13 size .5,.03
 set cblabel "Ratio of with/without precipitation"
-set label 3 "Colatitude (deg)" at 0,25 center
+set label 3 "Colatitude (deg)" at 0,10 center
 set cbrange[.1:100]     
 
 set title "Ratio of Pederson Conductivities "
@@ -987,7 +1149,7 @@ unset margin
 set bmargin at screen .3
 set colorbox horizontal user origin .25, .13 size .5,.03
 set cblabel "Ratio of with/without precipitation"
-set label 3 "Colatitude (deg)" at 0,25 center
+set label 3 "Colatitude (deg)" at 0,15 center
 set cbrange[.1:100]     
 
 set title "Ratio of Hall Conductivities "
@@ -1051,7 +1213,7 @@ unset margin
 set bmargin at screen .3
 set colorbox horizontal user origin .25, .13 size .5,.03
 set cblabel "Ratio of with/without precipitation"
-set label 3 "Colatitude (deg)" at 0,0 center
+set label 3 "Colatitude (deg)" at 0,-30 center
 set cbrange[.1:100]     
 
 set title "Ratio of Joule Heating Rate "
@@ -1107,7 +1269,7 @@ splot 'long_slice_000nooboth.txt' using ((\$1*2)-58):(\$4/1000):(\$9) with pm3d 
 
 unset multiplot
 
-###################### current density J_x ratio plot######################
+###################### current density J_x Ratio plot######################
 set terminal pngcairo enhanced color font "Veranda,22" size 1000,1000
 set output '`printf $outdir`long_current_Jx_rat-`printf "%06d" $num`.png'
 unset margin
@@ -1115,7 +1277,7 @@ set bmargin at screen .3
 set colorbox horizontal user origin .25, .13 size .5,.03
 set palette rgb 33,13,10 #rainbow (blue-green-yellow-red)
 set cblabel "Difference of with - without precipitation"
-set label 3 "Colatitude (deg)" at 0,25 center
+set label 3 "Colatitude (deg)" at 0,15 center
 set logscale cb
 set cbrange[1E-8:1E-5]     
 
@@ -1172,7 +1334,7 @@ splot 'long_slice_000nooboth.txt' using ((\$1*2)-58):(\$4/1000):(\$10) with pm3d
 
 unset multiplot
 
-###################### current density J_y ratio plot######################
+###################### current density J_y Ratio plot######################
 set terminal pngcairo enhanced color font "Veranda,22" size 1000,1000
 set output '`printf $outdir`long_current_Jy_rat-`printf "%06d" $num`.png'
 unset margin
@@ -1180,12 +1342,83 @@ set bmargin at screen .3
 set colorbox horizontal user origin .25, .13 size .5,.03
 set palette rgb 33,13,10 #rainbow (blue-green-yellow-red)
 set cblabel "Difference of with-without precipitation"
-set label 3 "Colatitude (deg)" at 0,25 center
+set label 3 "Colatitude (deg)" at 0,15 center
 set logscale cb
 set cbrange[1E-8:1E-5]     
 
 set title "Difference of J_y Current Density"
 splot 'long_slice_000rat.txt' using ((\$1*2)-(58)):(\$4/1000):(\$10) with pm3d 
+
+
+################################# long slice NDENS#####################################       
+set terminal pngcairo enhanced color font "Veranda,22" size 1500,1000                                 
+set output '`printf $outdir`long_ndens-`printf "%06d" $num`.png'                                      
+set multiplot title "Noon-Midnight Meridian Joule Heating"                                            
+unset key                                                                                             
+set xrange [-50:50]                                                                                   
+set angles degrees                                                                                    
+#set ylabel "Altitude (km)" rotate center                                                             
+set yrange [50:600]                                                                                   
+unset ztics                                                                                           
+set palette rgb 33,13,10 #rainbow (blue-green-yellow-red)                                             
+set format cb "10^{%L}"                                                                               
+#set format cb "10^{%S}"                                                                              
+set logscale cb                                                                                       
+set colorbox horizontal user origin .25, .15 size .5,.03                                              
+set cblabel "Neutral Density"                                                                   
+#set cbrange[1E5:1E10]                                                                                
+set cbrange[.1:1000000]                                                                               
+set view 0,0,1.3                                                                                      
+                                                                                                      
+###left plot###                                                                                       
+set lmargin at screen .05                                                                             
+set rmargin at screen .41                                                                             
+set bmargin at screen .25                                                                             
+set tmargin at screen .90                                                                             
+set label 1 "Altitude (km)" at 70,300 rotate center                                                   
+unset label 3                                                                                         
+set label 2 "Colatitude (deg)" at -50,-30                                                             
+                                                                                                      
+max_x=6                                                                                               
+min_x=-6                                                                                              
+max_y=550                                                                                             
+min_y=80                                                                                              
+#set object 1 polygon from min_x,min_y  to  max_x,min_y  to  max_x, max_y  to  min_x, max_y fillstyle\
+ solid noborder fillcolor rgb 'white' front                                                           
+set title "With Precipitation"                                                                        
+splot 'long_slice_000yesboth.txt' using ((\$1*2)-58):(\$4/1000):(\$11) with pm3d title "ndens"         
+                                                                                                      
+#right plot                                                                                           
+set lmargin at screen .52                                                                             
+set rmargin at screen .88                                                                             
+set bmargin at screen .25                                                                             
+set tmargin at screen .90                                                                             
+unset label 2                                                                                         
+set label 3 "Colatitude (deg)" at 20,-30                                                              
+                                                                                                      
+set title "Without Precipitation"                                                                     
+splot 'long_slice_000nooboth.txt' using ((\$1*2)-58):(\$4/1000):(\$11) with pm3d title "ndens"         
+                                                                                                     
+unset multiplot                                                          
+#################### ndens ratio plot ###############
+set terminal pngcairo enhanced color font "Veranda,22" size 1000,1000                                                                                                                                         
+set output '`printf $outdir`long_ndens_rat-`printf "%06d" $num`.png'                                                                                                                                     
+unset margin                                                                                                                                                                                                  
+set bmargin at screen .3                                                                                                                                                                                      
+set colorbox horizontal user origin .25, .13 size .5,.03                                                                                                                                                      
+#set palette rgb 33,13,10 #rainbow (blue-green-yellow-red)                                                                                                                                                    
+unset format cb
+set palette defined (-1E-6 "blue", 0 "white", 1E-6 "red")
+set cblabel "Ratio of with-without precipitation"                                                                                                                                                        
+set label 3 "Colatitude (deg)" at 0,-20 center                                                                                                                                                                 
+set logscale cb                                                                                                                                                                                               
+set cbrange[.9:1.1]                   
+set cbtics add (".9" .9)
+set cbtics add ("1.1" 1.1)
+                                                                                                                                                                                                              
+set title "Ratio of pressure layer neutral density"                                                                                                                                                                 
+splot 'long_slice_000rat.txt' using ((\$1*2)-(58)):(\$4/1000):(\$11) with pm3d 
+
 
 EOF
 

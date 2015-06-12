@@ -259,6 +259,7 @@ c     take the timenum from the file and divide it up into year,month,day,hour,m
          timenum=timenum - 60.0 * nminute
          seconds=timenum
       endif
+      seconds = 0.0
 c     check the output and make sure it makes sense
       print*,"nday= ",nday
       print*,"nhour= ",nhour
@@ -293,7 +294,7 @@ c     print out a polar profile
           call ctim_cotr('geo','sm',xgeo,ygeo,zgeo,xgse,ygse,zgse)
           write(117,*)xgeo,ygeo,zgeo,xgse,ygse,zgse,ht(k,I,J),
      1alden(k,I,J),hallc(k,I,J),pedc(k,i,j),joule(k,i,j),jdenx(k,i,j),
-     2jdeny(k,I,J),ndens(K,I,J),i,j,k
+     2jdeny(k,I,J),ndens(K,I,J)*1E11,i,j,k
 c     add the last slice so it closes
           if (J .eq. 20) then 
                the=(I-1)*2.*(3.14159/180)
@@ -306,7 +307,7 @@ c               phi=(mod((((1-1)*18.)+180.0),360.0)-180)*(3.14159/180)
           call ctim_cotr('geo','sm',xgeo,ygeo,zgeo,xgse,ygse,zgse)
           write(117,*)xgeo,ygeo,zgeo,xgse,ygse,zgse,ht(k,I,J),
      1alden(k,I,J),hallc(k,I,J),pedc(k,i,j),joule(k,i,j),jdenx(k,i,j),
-     2jdeny(k,I,J),ndens(K,I,J),i,j,k
+     2jdeny(k,I,J),ndens(K,I,J)*1E11,i,j,k
           endif
           if (xgse .gt. jd_max)then
              jd_max=xgse
@@ -333,11 +334,11 @@ c     now print out lat slices
          write(101,*)(29-I),J_DAY,k,ht(k,I,J_DAY),
      1alden(k,I,J_DAY),hallc(k,I,J_DAY),pedc(k,i,j_day),
      2joule(k,i,j_day),jdenx(k,i,j_day),jdeny(k,I,J_DAY),
-     3ndens(k,i,J_Day)
+     3ndens(k,i,J_Day)*1E11
          write(102,*)I+29,j_night,16-K,ht(16-k,I,j_night),
      1alden(16-k,I,j_night),hallc(16-k,I,j_night),pedc(16-k,i,j_night),
      2joule(16-k,i,j_night),jdenx(16-k,i,j_night),jdeny(16-k,I,j_night),
-     3ndens(16-k,i,j_night)
+     3ndens(16-k,i,j_night)*1E11
          enddo
          write(101,*)" "
          write(102,*)" "
@@ -347,15 +348,15 @@ c     now print out lat slices
 
                if (j .eq. 6) then
       write(106,*)I,J,K,ht(k,I,J),alden(k,I,J),hallc(k,I,J),pedc(k,i,j),
-     1joule(k,i,j),jdenx(k,i,j),jdeny(k,I,J),ndens(K,I,J)
+     1joule(k,i,j),jdenx(k,i,j),jdeny(k,I,J),ndens(K,I,J)*1E11
                endif
                if (j .eq. 11) then
       write(111,*)I,J,K,ht(k,I,J),alden(k,I,J),hallc(k,I,J),pedc(k,i,j),
-     1joule(k,i,j),jdenx(k,i,j),jdeny(k,I,J),ndens(K,I,J)
+     1joule(k,i,j),jdenx(k,i,j),jdeny(k,I,J),ndens(K,I,J)*1E11
                endif
                if (j .eq. 16) then
       write(116,*)I,J,K,ht(k,I,J),alden(k,I,J),hallc(k,I,J),pedc(k,i,j),
-     1joule(k,i,j),jdenx(k,i,j),jdeny(k,I,J),ndens(K,I,J)
+     1joule(k,i,j),jdenx(k,i,j),jdeny(k,I,J),ndens(K,I,J)*1E11
                endif
 c            enddo
 c            if (j .eq. 1 .and. I .lt. 29) then
