@@ -1,0 +1,178 @@
+#!/bin/bash
+#uses the program iof3d_read_interp_v2.f to read through *ioc* files and graphs
+# the data using gnuplot
+# Joseph B. Jensen july 2014
+
+####variables section####
+
+#controls the file time stamp increments by 60 each time it is run
+num=000000
+#selects the variable you want to look at code will probably need to be 
+#modified if you select anything other than density
+var1=CTIM_HT_3D_GEO 
+var2=CTIM_ALDEN_3D_GEO
+var3=CTIM_hallc_3D_GEO
+var4=CTIM_pedc_3D_GEO
+var5=CTIM_joule_3D_GEO 
+var6=CTIM_jdenx_3D_GEO
+var7=CTIM_jdeny_3D_GEO
+var8=CTIM_zkmheight_3D_GEO
+var9=CTIM_oprod_rate_nprec_3D_GEO
+var10=CTIM_oprod_rate_yprec_3D_GEO
+indir='/home/joe/storage/HSS11_20110429/'
+outdir='/home/joe/storage/HSS11_20110429/'
+#compile the code if you need
+#gfortran -o ctim_vis_joule.x ctim_vis_joule.f
+
+####run the ctim_vis.f####
+yes_no=$num
+#get the ioc files you can select just one, or the whole list
+#for a in /home/joe/storage/HSS07_20070128/hss07_20070128.ioc.* ; do 
+for a in /home/joe/storage/HSS11_20110429/hss11_20110429.ioc.* ; do 
+
+#/home/joe/trillian/wenhui_storms/storm_2004_11_07_`printf $yes_no`_precipitation/target/storm_2004_11_07_`printf $yes_no`_precipitation.ioc.0000* ; do
+#for a in /Users/joe/trillian/wenhui_storms/storm_2004_11_07_`printf $yes_no`_precipitation/target/storm_2004_11_07_`printf $yes_no`_precipitation.ioc.046080 ; do
+#for a in /home/joe/graphs/storm_2004_11_07_yes_precipitation.ioc.050400; do
+#for a in /home/jensen/trillian/scratch/tsmall/target/*ioc*.*; do
+#for a in /home/jensen/trillian/scratch/tsmall/target/*ioc*600; do
+
+#run the program note that this will loop for as many ioc files and you sent it
+./ctim_vis_joule.x $a $var1 $var2 $var3 $var4 $var5 $var6 $var7 $var8 $var9 $var10 $num $yes_no $outdir
+
+#get the ioc files you can select just one, or the whole list
+#b=/home/joe/graphs/storm_2004_11_07_no_precipitation.ioc.050400
+### this is for precipitation turned on with fudge factors removed
+#yes_no=yes_fixfak
+#b=/home/jensen/trillian/wenhui_storms/storm_2004_11_07_`printf $yes_no`_precipitation/target/storm_2004_11_07_`printf $yes_no`_precipitation.ioc.004680
+
+#### this is for precipitation turned off
+#yes_no=none
+#b=/home/joe/trillian/wenhui_storms/storm_2004_11_07_`printf $yes_no`_precipitation/target/storm_2004_11_07_`printf $yes_no`_precipitation.ioc.0000*
+#b=/Users/joe/trillian/wenhui_storms/storm_2004_11_07_`printf $yes_no`_precipitation/target/storm_2004_11_07_`printf $yes_no`_precipitation.ioc.046080
+#for a in /home/joe/trillian/wenhui_storms/storm_2004_11_07_`printf $yes_no`_precipitation/target/storm_2004_11_07_`printf $yes_no`_precipitation.ioc.046080; do
+#for a in /home/joe/trillian/scratch/tsmall/target/*ioc*.*; do
+#for a in /home/joe/trillian/scratch/tsmall/target/*ioc*600; do
+
+#yes_no=noo
+#run the program note that this will loop for as many ioc files and you sent it
+#./ctim_vis_joule.x $b $var1 $var2 $var3 $var4 $var5 $var6 $var7 $var8 $var9 $var10 $num $yes_no
+#make the plots
+####graph the data####
+
+#create the gnuplot file to graph !!!make sure you check where the output file goes!!!
+
+#the directory to put the output files in
+#outdir='/home/joe/storage/albuquerque/'
+
+
+cat > tmp1.gnu <<EOF
+reset
+#--------------------------------------------------------------------------------------------
+#---------polar orthonographic 150 km electron density plots particle yes vs no -------------
+#--------------------------------------------------------------------------------------------
+#hss2007 one
+#strftime("%Y %b %d %H:%M:%S", 1169980200)
+
+#hss2011
+#strftime("%Y %b %d %H:%M:%S", 1304080200)
+
+set terminal pngcairo enhanced color font "Veranda,18" size 720,720
+set output "`printf $outdir`hialden-`printf "%06d" $num`.png"
+dd = 1304080200 + `printf $num`
+set multiplot title "TEC at ".strftime("%Y %b %d %H:%M:%S", dd)." UT"
+
+set pm3d flush center interpolate 0,0
+#set pm3d depthorder
+set hidden3d
+r = 6427.
+#r = 5700.
+rz= 8000.
+set xrange[-r:r]
+set yrange[-r:r]
+set zrange[-1000:rz]
+set cbrange[0:8]
+set cblabel "OpenGGCM-CTIM Integrated e^- Density (TECU)"
+set palette rgb 33,13,10 #rainbow (blue-green-yellow-red)
+set colorbox horizontal user origin .1, .15 size .8,.04
+
+#set format cb "%1.1t{/Symbol \327}10^{%S}"
+#set format cb "10^{%L}"
+#set logscale cb
+
+unset key
+unset ylabel
+unset ytics
+unset xlabel
+unset xtics
+unset ztics
+unset border
+
+#set xlabel "x"
+
+#north pole
+#set view 360,270,1.00
+set view 360,90,1.00
+#set view 0,0,1.00
+###left plot###
+set lmargin at screen .175
+set rmargin at screen .825
+set bmargin at screen .25
+set tmargin at screen .90
+
+#splot '`printf $indir`hialden_`printf "%06d" $num`.txt' using 1:2:3:(\$4) with pm3d 
+splot '`printf $indir`hialden_`printf "%06d" $num`.txt' using 1:2:3:(\$5) with pm3d 
+
+### now make the polar grid overlayed ###
+unset key
+set style line 12 lc rgb 'black' lt 0 lw 1.5
+set grid polar ls 12
+set polar
+set angles degrees
+set rtics format '' scale 0
+#used R = 6480
+set rtics (1187,2339,3420,4397,5239,5924,6427,6736,6840)
+set rrange[0:r]
+unset raxis
+r1=5924
+r2=10000
+
+##add labels 
+labnum=6500
+set label "6" at labnum,0 front center
+set label "12" at 0, labnum front center
+set label "18" at -labnum, 0 front center
+set label "24" at 0,-labnum front center
+set label "10" at 1187*cos(30),1187*sin(30) front center font "Veranda,14"
+set label "20" at 2339*cos(30),2339*sin(30) front center font "Veranda,14"
+set label "30" at 3420*cos(30),3420*sin(30) front center font "Veranda,14"
+set label "40" at 4397*cos(30),4397*sin(30) front center font "Veranda,14"
+set label "50" at 5239*cos(30),5239*sin(30) front center font "Veranda,14"
+set label "60" at 5924*cos(30),5924*sin(30) front center font "Veranda,14"
+
+
+#this plot cleans the edges of the cirle and plots the grid liens
+plot '+' using 1:(r1):(r2) with filledcurves lt rgb "white"
+
+set lmargin at screen .02
+set rmargin at screen .825
+set bmargin at screen .25
+set tmargin at screen .99
+
+unset polar
+# add the UNH logo 
+#plot '7_unhlogo_web_hr.png' binary filetype=png origin=(-6500,4000) dx=2 dy=2 with rgbalpha notitle
+
+unset pm3d
+unset label
+unset cbrange
+plot 'logo.png' binary filetype=png origin=(-6400,3100) dx=2.25 dy=2.25 with rgbalpha notitle
+
+
+
+EOF
+
+gnuplot tmp1.gnu
+
+let "num = $num + 60"
+done
+
